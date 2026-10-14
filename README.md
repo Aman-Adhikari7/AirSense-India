@@ -2,7 +2,7 @@
 
 **National Air Quality Monitoring, CPCB Station Telemetry & 5-Day AI Forecast Platform**
 
-AirSense India is a modern, full-stack environmental analytics platform tracking real-time air quality across all **36 States and Union Territories** and **111 major Indian cities**. Built strictly in accordance with **Central Pollution Control Board (CPCB 2014)** standards and **Indian Standard Time (IST, UTC+5:30)**.
+AirSense India is a modern, full-stack ai powered environmental analytics platform that provides next 15 days prediction of aqi using ai model tracking real-time air quality across all **36 States and Union Territories** and **111 major Indian cities**. Built strictly in accordance with **Central Pollution Control Board (CPCB 2014)** standards and **Indian Standard Time (IST, UTC+5:30)**.
 
 ---
 
@@ -225,6 +225,24 @@ Once built, open [http://localhost:8000/](http://localhost:8000/) in your browse
 > - **Running Without API Keys (Offline Evaluation Mode):**
 >   If you clone and run without adding API keys, the application automatically uses the included pre-seeded SQLite database (`airq.db`). All 111 catalogue cities and official CPCB monitoring stations will still display so you can immediately explore and evaluate the UI, maps, charts, and forecasts!
 
+### 🤖 Enabling Full Conversational AI (Groq / Grok / Llama 3.3):
+
+By default, **AirSense AI operates in Offline Database Mode** without needing any API keys. In offline mode, it answers directly from its internal database and algorithmic models:
+- 📍 **City AQI Telemetry:** Look up real-time AQI and PM2.5/PM10 readings for any of the 111 catalogue cities.
+- 🗺️ **State AQI Summaries:** Queries all 36 States & UTs (e.g. *"What is the AQI in UP?"*, *"Punjab"*, *"Maharashtra"*), calculating state-level averages and listing top polluted cities.
+- 📈 **5-Day Forecast Architecture:** Explains the HistGradientBoosting ML model, festival proximity multipliers, and stubble burning cycles.
+- 🌫️ **Winter Smog & Stubble Science:** Breaks down thermal inversion, calm winds, and transboundary smoke transport across the Indo-Gangetic Plains.
+- 😷 **CPCB Health Guidance:** Clear advisories on N95 respirators, outdoor exercise/jogging safety thresholds, and vulnerable population precautions.
+
+**To enable open-ended conversation (like ChatGPT / Grok):**
+1. Get a **free API key** from [Groq Console](https://console.groq.com/keys) (takes 30 seconds, no credit card required).
+2. Open `backend/.env` and set:
+   ```ini
+   LLM_API_KEY=gsk_your_actual_groq_api_key_here
+   LLM_MODEL=llama-3.3-70b-versatile
+   ```
+3. Restart the backend. The AI Assistant will now respond with ultra-fast, intelligent conversational answers powered by Llama 3.3 70B!
+
 ### Example `backend/.env` Configuration:
 
 ```ini
@@ -238,9 +256,10 @@ ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:800
 OPENAQ_API_KEY=               # Free at https://explore.openaq.org
 WAQI_TOKEN=                   # Free at https://aqicn.org/data-platform/token/
 
-# 🤖 Optional: AirSense AI Assistant LLM Provider
+# 🤖 AirSense Conversational AI Assistant:
 AGENT_ENABLED=true
-LLM_API_KEY=                  # Groq or OpenAI key (optional, has built-in offline fallback)
+LLM_API_KEY=                  # Free at https://console.groq.com/keys
+LLM_BASE_URL=https://api.groq.com/openai/v1
 LLM_MODEL=llama-3.3-70b-versatile
 ```
 

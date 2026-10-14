@@ -15,7 +15,15 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
   const [messages, setMessages] = useState([
     {
       sender: "ai",
-      text: "Hello! I am **AirSense AI**, your environmental health assistant. How can I help you understand Indian air quality, CPCB standards, or health precautions today?",
+      text:
+        "Hello! I am **AirSense AI**, your environmental assistant (currently in **Offline Database Mode**).\n\n" +
+        "📚 **What I can answer from our local system:**\n" +
+        "• **City AQI Lookups:** *\"What is the AQI in Chandigarh?\"*, *\"Delhi air quality\"*, *\"Mohali\"*, *\"Mumbai\"*\n" +
+        "• **State AQI Lookups:** *\"What is the AQI in UP?\"*, *\"Punjab\"*, *\"Haryana\"*, *\"Maharashtra\"*\n" +
+        "• **AI Forecast Models:** *\"How are you predicting the 5-day forecast?\"*\n" +
+        "• **Winter Smog & Stubble:** *\"Why is air quality in Delhi high during winter?\"*\n" +
+        "• **Health Precautions:** *\"N95 mask advice\"*, *\"Safe jogging AQI\"*, *\"Diwali precautions\"*\n\n" +
+        "💡 *Tip: For open-ended conversation like ChatGPT or Grok, add a free Groq key (`LLM_API_KEY`) to `backend/.env`!*",
     },
   ]);
   const [input, setInput] = useState("");
@@ -35,20 +43,15 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
   const MAX_QUESTIONS = 10;
   const todayKey = new Date().toISOString().slice(0, 10);
 
-  const [questionCount, setQuestionCount] = useState(() => {
+  const [questionCount, setQuestionCount] = useState(0);
+
+  const resetQuestionLimit = () => {
+    setQuestionCount(0);
     try {
-      const savedDate = localStorage.getItem("airsense_query_date");
-      const savedCount = parseInt(localStorage.getItem("airsense_query_count") || "0", 10);
-      if (savedDate === todayKey) {
-        return isNaN(savedCount) ? 0 : savedCount;
-      }
-      localStorage.setItem("airsense_query_date", todayKey);
       localStorage.setItem("airsense_query_count", "0");
-      return 0;
-    } catch {
-      return 0;
-    }
-  });
+      localStorage.setItem("airsense_query_date", todayKey);
+    } catch {}
+  };
 
   const handleSend = async (textToSend = null) => {
     const text = textToSend || input;
@@ -133,8 +136,19 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
                 <div>
                   <h3 className="font-bold text-gray-900 text-sm">AirSense AI Assistant</h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
-                      {MAX_QUESTIONS - questionCount} / {MAX_QUESTIONS} queries left
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span>{MAX_QUESTIONS - questionCount} / {MAX_QUESTIONS} left</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          resetQuestionLimit();
+                        }}
+                        className="ml-0.5 text-[9px] bg-emerald-200 hover:bg-emerald-300 text-emerald-900 px-1 py-0.2 rounded font-semibold transition"
+                        title="Reset daily question limit"
+                      >
+                        Reset
+                      </button>
                     </span>
                     {placeName && (
                       <span className="text-[10px] text-gray-500 font-medium truncate max-w-[120px]">
@@ -150,6 +164,14 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
               >
                 ✕
               </button>
+            </div>
+
+            {/* Offline Mode Banner */}
+            <div className="bg-amber-50 border-b border-amber-200 px-3.5 py-2 text-[11px] text-amber-900 flex items-start gap-2">
+              <span className="text-amber-600 text-sm leading-none mt-0.5">⚠️</span>
+              <div className="leading-tight">
+                <span className="font-bold text-amber-950">Offline Database Mode:</span> Answering from local 111-city AQI database & environmental models. For full conversational AI (like ChatGPT / Grok), connect a free Groq key in <code className="bg-amber-100 text-amber-950 px-1 py-0.5 rounded font-mono text-[10px]">backend/.env</code>.
+              </div>
             </div>
 
             {/* Messages Thread */}
