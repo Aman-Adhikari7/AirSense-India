@@ -14,6 +14,9 @@ AirSense India is a modern, full-stack environmental analytics platform tracking
    - Quick-zoom region presets: All India, Punjab & Tricity (Mohali/Kharar/Chandigarh), Delhi NCR, Mumbai, and Bengaluru.
    - Zero watermark, 100% free OpenStreetMap standard tiles (no API keys required).
 
+   ![Home Page — India AQI Bubble Map](docs/images/home_map_overview.png)
+   ![India Map — Central & Eastern States](docs/images/india_map_zoomed.png)
+
 2. **Real-Time Ground Monitoring Station Telemetry**
    - Strictly measured values from continuous ambient air monitoring stations (CAAQMS) via OpenAQ v3 and WAQI APIs.
    - Displays actual monitoring station name (e.g. *CPCB CAAQMS - Anand Vihar, Delhi*, *Sector 22 Chandigarh*, *Sector 67 Mohali*, *Kharar*).
@@ -21,11 +24,16 @@ AirSense India is a modern, full-stack environmental analytics platform tracking
    - Automatic 60-second background polling with **Delayed Feed Warning (⚠️ >30 min old)**.
    - Zero synthetic, modeled, or fake AQI values on live dashboards.
 
+   ![Featured Real-Time Monitoring Stations](docs/images/featured_stations.png)
+
 3. **Advanced Search & Station Directory (`/search`)**
    - Instant search by city name, state, or monitoring station.
-   - Filter by State/UT dropdown or CPCB Category (Good, Satisfactory, Moderate, Poor, Very Poor, Severe).
+   - Visual **State AQI Bar Graph** showing all 36 States/UTs sorted by pollution level at a glance.
+   - Filter by CPCB Category (Good, Satisfactory, Moderate, Poor, Very Poor, Severe).
    - Sort by most polluted, cleanest, or alphabetical order.
    - Instant autocomplete suggestions dropdown directly under the home search bar.
+
+   ![State AQI Bar Graph — Search Page](docs/images/state_aqi_bargraph.png)
 
 4. **5-Day Festival-Aware AI Forecast & 30-Day Seasonal Outlook**
    - Gradient Boosting model accounting for seasonal inversions, stubble burning cycles, and celebratory festival surges (Diwali, Holi, Dussehra).
@@ -38,6 +46,8 @@ AirSense India is a modern, full-stack environmental analytics platform tracking
 6. **AirSense AI Assistant**
    - Built-in conversational assistant answering queries about pollution sources, health advisories, and local air quality.
    - Daily device tracking (10 free queries per session/day via local storage).
+
+   ![Search Page with AI Assistant Panel](docs/images/search_ai_assistant.png)
 
 ---
 
@@ -181,9 +191,22 @@ When built, the FastAPI backend on port 8000 automatically serves the production
 
 ---
 
-## ⚙️ Configuration & Environment Variables
+## ⚙️ Configuration & API Keys (.env)
 
-Copy `backend/.env.example` to `backend/.env` (optional — works out of the box with default SQLite):
+> [!IMPORTANT]
+> **API Key Setup for Live Ground Station Streaming:**
+> - To fetch **real-time live station measurements directly from the sensors**, you need a free API key from either **OpenAQ** or **WAQI** (both take 30 seconds to get for free):
+>   1. **OpenAQ v3 Key (Preferred)**: Register free at [explore.openaq.org](https://explore.openaq.org) $\rightarrow$ copy your key.
+>   2. **WAQI Token (Fallback)**: Enter your email at [aqicn.org/data-platform/token](https://aqicn.org/data-platform/token/) $\rightarrow$ token is sent instantly.
+> - Add your key(s) to `backend/.env`:
+>   ```ini
+>   OPENAQ_API_KEY=your_actual_openaq_api_key_here
+>   WAQI_TOKEN=your_actual_waqi_token_here
+>   ```
+> - **Running Without API Keys (Offline Evaluation Mode):**
+>   If you clone and run without adding API keys, the application automatically uses the included pre-seeded SQLite database (`airq.db`). All 111 catalogue cities and official CPCB monitoring stations will still display so you can immediately explore and evaluate the UI, maps, charts, and forecasts!
+
+### Example `backend/.env` Configuration:
 
 ```ini
 APP_ENV=development
@@ -192,17 +215,15 @@ AUTO_CREATE_TABLES=true
 AUTO_SEED_PLACES=true
 ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,http://127.0.0.1:8000
 
-# Optional: Ground Station Live Feed Keys (Both are 100% free to register)
-OPENAQ_API_KEY=               # Register free at https://explore.openaq.org
-WAQI_TOKEN=                   # Register free token at https://aqicn.org/data-platform/token/
+# 📡 Real-Time Ground Monitoring Station APIs (Free Registration):
+OPENAQ_API_KEY=               # Free at https://explore.openaq.org
+WAQI_TOKEN=                   # Free at https://aqicn.org/data-platform/token/
 
-# Optional: AI Assistant Provider
+# 🤖 Optional: AirSense AI Assistant LLM Provider
 AGENT_ENABLED=true
-LLM_API_KEY=                  # Groq / OpenAI API Key (optional fallback to built-in knowledge)
+LLM_API_KEY=                  # Groq or OpenAI key (optional, has built-in offline fallback)
 LLM_MODEL=llama-3.3-70b-versatile
 ```
-
-> **Note:** The included SQLite database (`airq.db`) comes pre-seeded with all 111 catalogue places and baseline ground station records so the dashboard works fully even without external API keys.
 
 ---
 
