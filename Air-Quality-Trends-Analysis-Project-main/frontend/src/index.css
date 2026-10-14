@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #ffffff;
+  --color-canvas: #F9FAFB;
+  --color-primary: #059669;
+  --color-primary-dark: #047857;
+  --color-forest: #065F46;
+  --color-text: #111827;
+  --color-text-2: #374151;
+  --color-muted: #6B7280;
+  --color-border: #E5E7EB;
+
+  /* CPCB Indian AQI Standard Color Scale */
+  --aqi-good: #1E9E57;
+  --aqi-satisfactory: #8BC34A;
+  --aqi-moderate: #F4C20D;
+  --aqi-poor: #F28C28;
+  --aqi-very-poor: #D32F2F;
+  --aqi-severe: #7B1113;
+  --aqi-unknown: #BDBDBD;
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

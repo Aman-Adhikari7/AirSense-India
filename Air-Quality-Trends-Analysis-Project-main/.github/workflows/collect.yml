@@ -1,0 +1,29 @@
+# Hourly data collection + nightly forecast, free on GitHub Actions.
+# Needs repository secrets: DATABASE_URL (free hosted Postgres, with ?sslmode=require) and OPENAQ_API_KEY (free).
+# NOTE: scheduled workflows can be delayed and may be disabled on inactive repos; it is best-effort by design.
+name: collect-data
+on:
+  schedule:
+    - cron: "10 * * * *"      # every hour at :10 -> collector
+    - cron: "40 20 * * *"     # 20:40 UTC = 02:10 IST -> forecast
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults: { run: { working-directory: backend } }
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      OPENAQ_API_KEY: ${{ secrets.OPENAQ_API_KEY }}
+      APP_ENV: development   # jobs never serve HTTP; production checks are for the API process
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt
+      - name: Collect (hourly)
+        if: github.event.schedule != '40 20 * * *'
+        run: python -m app.jobs.collect --days 3
+      - name: Forecast (nightly)
+        if: github.event.schedule == '40 20 * * *'
+        run: python -m app.jobs.forecast

@@ -1,0 +1,112 @@
+name,state,kind,lat,lon
+Amaravati,Andhra Pradesh,state_capital,16.57,80.36
+Visakhapatnam,Andhra Pradesh,city,17.69,83.22
+Vijayawada,Andhra Pradesh,city,16.51,80.65
+Guntur,Andhra Pradesh,city,16.31,80.44
+Tirupati,Andhra Pradesh,city,13.63,79.42
+Itanagar,Arunachal Pradesh,state_capital,27.08,93.61
+Dispur,Assam,state_capital,26.14,91.79
+Guwahati,Assam,city,26.14,91.74
+Silchar,Assam,city,24.83,92.78
+Dibrugarh,Assam,city,27.48,94.91
+Patna,Bihar,state_capital,25.59,85.14
+Gaya,Bihar,city,24.80,85.00
+Muzaffarpur,Bihar,city,26.12,85.39
+Bhagalpur,Bihar,city,25.24,86.97
+Raipur,Chhattisgarh,state_capital,21.25,81.63
+Bhilai,Chhattisgarh,city,21.21,81.38
+Bilaspur,Chhattisgarh,city,22.08,82.14
+Panaji,Goa,state_capital,15.50,73.83
+Margao,Goa,city,15.27,73.96
+Vasco da Gama,Goa,city,15.40,73.81
+Gandhinagar,Gujarat,state_capital,23.22,72.65
+Ahmedabad,Gujarat,city,23.02,72.57
+Surat,Gujarat,city,21.17,72.83
+Vadodara,Gujarat,city,22.31,73.18
+Rajkot,Gujarat,city,22.30,70.80
+Gurugram,Haryana,city,28.46,77.03
+Faridabad,Haryana,city,28.41,77.31
+Panipat,Haryana,city,29.39,76.97
+Rohtak,Haryana,city,28.89,76.61
+Hisar,Haryana,city,29.15,75.72
+Shimla,Himachal Pradesh,state_capital,31.10,77.17
+Baddi,Himachal Pradesh,city,30.96,76.79
+Ranchi,Jharkhand,state_capital,23.34,85.31
+Jamshedpur,Jharkhand,city,22.80,86.20
+Dhanbad,Jharkhand,city,23.80,86.43
+Bengaluru,Karnataka,state_capital,12.97,77.59
+Mysuru,Karnataka,city,12.30,76.64
+Mangaluru,Karnataka,city,12.91,74.86
+Hubballi,Karnataka,city,15.36,75.12
+Belagavi,Karnataka,city,15.85,74.50
+Thiruvananthapuram,Kerala,state_capital,8.52,76.94
+Kochi,Kerala,city,9.93,76.27
+Kozhikode,Kerala,city,11.26,75.78
+Thrissur,Kerala,city,10.53,76.21
+Bhopal,Madhya Pradesh,state_capital,23.26,77.41
+Indore,Madhya Pradesh,city,22.72,75.86
+Gwalior,Madhya Pradesh,city,26.22,78.18
+Jabalpur,Madhya Pradesh,city,23.18,79.99
+Ujjain,Madhya Pradesh,city,23.18,75.78
+Mumbai,Maharashtra,state_capital,19.08,72.88
+Pune,Maharashtra,city,18.52,73.86
+Nagpur,Maharashtra,city,21.15,79.09
+Nashik,Maharashtra,city,19.99,73.79
+Thane,Maharashtra,city,19.22,72.98
+Chhatrapati Sambhajinagar,Maharashtra,city,19.88,75.34
+Solapur,Maharashtra,city,17.66,75.91
+Imphal,Manipur,state_capital,24.82,93.94
+Shillong,Meghalaya,state_capital,25.57,91.88
+Aizawl,Mizoram,state_capital,23.73,92.72
+Kohima,Nagaland,state_capital,25.67,94.11
+Bhubaneswar,Odisha,state_capital,20.30,85.82
+Cuttack,Odisha,city,20.46,85.88
+Rourkela,Odisha,city,22.26,84.85
+Ludhiana,Punjab,city,30.90,75.86
+Amritsar,Punjab,city,31.63,74.87
+Jalandhar,Punjab,city,31.33,75.58
+Patiala,Punjab,city,30.34,76.39
+Bathinda,Punjab,city,30.21,74.95
+Mohali,Punjab,city,30.70,76.71
+Kharar,Punjab,city,30.74,76.64
+Jaipur,Rajasthan,state_capital,26.91,75.79
+Jodhpur,Rajasthan,city,26.24,73.02
+Udaipur,Rajasthan,city,24.59,73.71
+Kota,Rajasthan,city,25.18,75.84
+Ajmer,Rajasthan,city,26.45,74.64
+Bikaner,Rajasthan,city,28.02,73.31
+Gangtok,Sikkim,state_capital,27.33,88.61
+Chennai,Tamil Nadu,state_capital,13.08,80.27
+Coimbatore,Tamil Nadu,city,11.02,76.96
+Madurai,Tamil Nadu,city,9.93,78.12
+Tiruchirappalli,Tamil Nadu,city,10.79,78.70
+Salem,Tamil Nadu,city,11.66,78.15
+Hyderabad,Telangana,state_capital,17.39,78.49
+Warangal,Telangana,city,17.97,79.59
+Agartala,Tripura,state_capital,23.83,91.28
+Lucknow,Uttar Pradesh,state_capital,26.85,80.95
+Kanpur,Uttar Pradesh,city,26.45,80.35
+Varanasi,Uttar Pradesh,city,25.32,82.97
+Agra,Uttar Pradesh,city,27.18,78.02
+Prayagraj,Uttar Pradesh,city,25.44,81.85
+Ghaziabad,Uttar Pradesh,city,28.67,77.45
+Noida,Uttar Pradesh,city,28.54,77.39
+Meerut,Uttar Pradesh,city,28.98,77.71
+Gorakhpur,Uttar Pradesh,city,26.76,83.37
+Dehradun,Uttarakhand,state_capital,30.32,78.03
+Haridwar,Uttarakhand,city,29.95,78.16
+Haldwani,Uttarakhand,city,29.22,79.51
+Kolkata,West Bengal,state_capital,22.57,88.36
+Howrah,West Bengal,city,22.59,88.26
+Durgapur,West Bengal,city,23.55,87.32
+Siliguri,West Bengal,city,26.73,88.40
+Asansol,West Bengal,city,23.68,86.98
+Port Blair,Andaman and Nicobar Islands,state_capital,11.62,92.73
+Chandigarh,Chandigarh,state_capital,30.73,76.78
+Daman,Dadra and Nagar Haveli and Daman and Diu,state_capital,20.40,72.83
+Delhi,Delhi,state_capital,28.61,77.21
+Srinagar,Jammu and Kashmir,state_capital,34.08,74.80
+Jammu,Jammu and Kashmir,city,32.73,74.87
+Leh,Ladakh,state_capital,34.15,77.58
+Kavaratti,Lakshadweep,state_capital,10.57,72.64
+Puducherry,Puducherry,state_capital,11.93,79.83

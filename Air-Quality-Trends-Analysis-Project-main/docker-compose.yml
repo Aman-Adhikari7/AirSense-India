@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airq
+      POSTGRES_PASSWORD: airq
+      POSTGRES_DB: airq
+    ports:
+      - "5432:5432"
+    volumes:
+      - airq_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airq -d airq"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://airq:airq@db:5432/airq
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,http://localhost
+      AUTO_CREATE_TABLES: "true"
+      AUTO_SEED_PLACES: "true"
+      OPENAQ_API_KEY: ""
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE: http://localhost:8000
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  airq_pgdata:

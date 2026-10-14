@@ -1,0 +1,25 @@
+# AirSense India - backend dependencies (direct deps only, UTF-8, pinned)
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+pydantic==2.11.7
+email-validator==2.1.1
+SQLAlchemy==2.0.43
+psycopg[binary]==3.2.9
+python-dotenv==1.1.1
+requests==2.32.5
+python-dateutil==2.9.0.post0
+beautifulsoup4==4.12.3
+numpy==2.3.3
+pandas==2.3.2
+scipy==1.16.2
+statsmodels==0.14.5
+scikit-learn==1.7.2
+joblib==1.5.2
+reportlab==4.2.5
+pillow==11.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+PyJWT==2.8.0
+urllib3==2.5.0
+charset-normalizer==3.4.3
+certifi==2025.8.3

@@ -1,0 +1,23 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+backend/models/*.joblib
+*.db
+
+# node
+node_modules/
+frontend/dist/
+
+# os / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
