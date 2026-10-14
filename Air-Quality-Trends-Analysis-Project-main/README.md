@@ -2,7 +2,7 @@
 
 **National Air Quality Monitoring, CPCB Station Telemetry & 5-Day AI Forecast Platform**
 
-AirSense India is a modern, full-stack environmental analytics platform tracking real-time air quality across all **36 States and Union Territories** and **111 major Indian cities**. Built strictly in accordance with **Central Pollution Control Board (CPCB 2014)** standards and **Indian Standard Time (IST, UTC+5:30)**.
+AirSense India is a modern, full-stack ai powered environmental analytics platform that provides next 15 days prediction of aqi using ai model tracking real-time air quality across all **36 States and Union Territories** and **111 major Indian cities**. Built strictly in accordance with **Central Pollution Control Board (CPCB 2014)** standards and **Indian Standard Time (IST, UTC+5:30)**.
 
 ---
 
