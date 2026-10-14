@@ -46,6 +46,8 @@ AirSense India is a modern, full-stack environmental analytics platform tracking
    - Comprehensive breakdown of CPCB health impacts for low, moderate, and high pollution bands.
    - Direct comparison between Indian National Ambient Air Quality Standards (NAAQS) and WHO 2021 guidelines.
 
+   ![Air Quality & Health Guide](docs/images/about_health_guide.png)
+
 6. **AirSense AI Assistant**
    - Built-in conversational assistant answering queries about pollution sources, health advisories, and local air quality.
    - Daily device tracking (10 free queries per session/day via local storage).

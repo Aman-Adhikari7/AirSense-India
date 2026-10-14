@@ -39,9 +39,14 @@ AirSense India is a modern, full-stack environmental analytics platform tracking
    - Gradient Boosting model accounting for seasonal inversions, stubble burning cycles, and celebratory festival surges (Diwali, Holi, Dussehra).
    - Extended situational outlook for Days 6–30 based on day-of-year historical baselines and interquartile confidence ranges.
 
+   ![City Page — Live AQI + 5-Day AI Forecast](docs/images/place_5day_forecast.png)
+   ![Extended Seasonal Baseline — Days 6–30](docs/images/seasonal_outlook.png)
+
 5. **About & Environmental Health Guide (`/about`)**
    - Comprehensive breakdown of CPCB health impacts for low, moderate, and high pollution bands.
    - Direct comparison between Indian National Ambient Air Quality Standards (NAAQS) and WHO 2021 guidelines.
+
+   ![Air Quality & Health Guide](docs/images/about_health_guide.png)
 
 6. **AirSense AI Assistant**
    - Built-in conversational assistant answering queries about pollution sources, health advisories, and local air quality.
