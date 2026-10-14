@@ -117,82 +117,96 @@ AirSense India uses a specialized multi-tiered machine learning and statistical 
 
 ---
 
-## 🚀 Quick Start (Windows)
+## 🚀 How to Run the Project
 
-The repository includes a one-click launcher that starts both the backend and frontend simultaneously:
+### Prerequisites
+- **Python 3.10+** (Check via `python --version` or `python3 --version`)
+- **Node.js 18+** & **npm** (Check via `node -v` and `npm -v`)
 
+### Step 0: Clone the Repository
+```bash
+git clone https://github.com/Aman-Adhikari7/AirSense-India.git
+cd AirSense-India
+```
+
+---
+
+### 🪟 Windows Setup & Run
+
+#### Option A: One-Click Launcher (Recommended for Windows)
+From the project folder, simply double-click or run:
 ```cmd
 start_local_dev.bat
 ```
+*This automatically launches both the FastAPI backend on port 8000 and the Vite frontend on port 5173 in separate command windows.*
 
-- **Web Dashboard:** [http://localhost:5173](http://localhost:5173)
-- **API Documentation (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
+#### Option B: Manual Windows Terminal
 
----
-
-## 🛠️ Manual Installation & Run
-
-### Prerequisites
-- **Python 3.10+** (Python 3.12 recommended)
-- **Node.js 18+** & **npm**
-
----
-
-### Step 1: Backend Setup (FastAPI)
-
-```bash
-# Navigate to backend directory
-cd backend
-
-# Create and activate virtual environment
-# On Windows:
+**Terminal 1 — Backend (FastAPI):**
+```cmd
+cd Air-Quality-Trends-Analysis-Project-main\backend
 python -m venv .venv
 .venv\Scripts\activate
-
-# On macOS/Linux:
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Start backend server (defaults to local SQLite database: airq.db)
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-The API server will run at `http://127.0.0.1:8000`. You can inspect the interactive OpenAPI documentation at `http://127.0.0.1:8000/docs`.
-
----
-
-### Step 2: Frontend Setup (React + Vite + Tailwind CSS)
-
-Open a new terminal window:
-
-```bash
-# Navigate to frontend directory
-cd frontend
-
-# Install node dependencies
+**Terminal 2 — Frontend (React + Vite):**
+```cmd
+cd Air-Quality-Trends-Analysis-Project-main\frontend
 npm install
-
-# Start Vite development server
 npm run dev
 ```
 
-The frontend will start at `http://localhost:5173`. Requests to `/map`, `/places`, `/about`, and `/agent` are automatically proxied to the backend on port 8000.
+---
+
+### 🍎 macOS & Linux Setup & Run
+
+Open two terminal tabs in the cloned `AirSense-India` directory:
+
+**Terminal 1 — Backend (FastAPI):**
+```bash
+cd Air-Quality-Trends-Analysis-Project-main/backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**Terminal 2 — Frontend (React + Vite):**
+```bash
+cd Air-Quality-Trends-Analysis-Project-main/frontend
+npm install
+npm run dev
+```
 
 ---
 
-### Step 3: Production Build (Single-Port Serving)
+### 🌐 Accessing the Application
 
-You can also build the frontend into static assets:
+Once both servers are running:
+- **Interactive Web Dashboard:** [http://localhost:5173](http://localhost:5173)
+- **API Documentation (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Backend Health Check:** [http://localhost:8000/healthz](http://localhost:8000/healthz)
 
-```bash
-cd frontend
+---
+
+### 📦 Optional: Production Build (Single-Port Serving)
+You can also compile the frontend so the FastAPI backend serves both the API and UI directly on port 8000:
+
+**On Windows:**
+```cmd
+cd Air-Quality-Trends-Analysis-Project-main\frontend
 npm run build
 ```
 
-When built, the FastAPI backend on port 8000 automatically serves the production frontend at `http://localhost:8000/` without needing Vite running!
+**On macOS / Linux:**
+```bash
+cd Air-Quality-Trends-Analysis-Project-main/frontend
+npm run build
+```
+
+Once built, open [http://localhost:8000/](http://localhost:8000/) in your browser.
 
 ---
 
