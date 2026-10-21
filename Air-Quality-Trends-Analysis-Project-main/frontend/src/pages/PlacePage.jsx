@@ -122,7 +122,7 @@ export default function PlacePage() {
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <button
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-800 transition"
@@ -130,16 +130,16 @@ export default function PlacePage() {
             <span>← Back to National Map</span>
           </button>
 
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
             <span>Live CPCB Telemetry • {place.lat?.toFixed(2)}°N, {place.lon?.toFixed(2)}°E</span>
           </div>
         </div>
 
         {/* 🌟 HERO: LIVE GROUND TELEMETRY BANNER */}
-        <section className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
-            <div className="flex-1">
+        <section className="bg-white rounded-3xl border border-gray-200 p-5 sm:p-8 shadow-sm">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
                   {place.kind || "City"}
@@ -149,7 +149,7 @@ export default function PlacePage() {
                 <span className="text-xs text-gray-500 font-medium">District: {place.district || place.name}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight">
+              <h1 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight truncate">
                 {place.name}
               </h1>
 
@@ -305,7 +305,7 @@ export default function PlacePage() {
 
           {/* 🗂️ 5-DAY GRAPHICAL CARD TILES */}
           {days5.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
               {days5.map((d, idx) => {
                 const dayDate = new Date(d.date);
                 const weekday = dayDate.toLocaleDateString("en-IN", { weekday: "short" });

@@ -173,44 +173,46 @@ export default function IndiaAqiMap({ places = [], onSelectPlace = null }) {
         </div>
 
         {/* Quick Region Switcher */}
-        <div className="flex flex-wrap gap-1.5 text-xs">
+        <div className="overflow-x-auto -mx-1 pb-1">
+          <div className="flex gap-1.5 text-xs px-1 min-w-max">
           <button
             onClick={() => zoomToRegion(22.5937, 78.9629, 5)}
-            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition"
+            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition whitespace-nowrap"
           >
             🇮🇳 All India
           </button>
           <button
             onClick={() => zoomToRegion(30.73, 76.78, 8)}
-            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition"
+            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition whitespace-nowrap"
           >
-            📍 Punjab & Tricity (Mohali/Kharar)
+            📍 Punjab & Tricity
           </button>
           <button
             onClick={() => zoomToRegion(28.61, 77.21, 8)}
-            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition"
+            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition whitespace-nowrap"
           >
             📍 Delhi NCR
           </button>
           <button
             onClick={() => zoomToRegion(19.07, 72.87, 8)}
-            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition"
+            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition whitespace-nowrap"
           >
             📍 Mumbai
           </button>
           <button
             onClick={() => zoomToRegion(12.97, 77.59, 8)}
-            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition"
+            className="px-2.5 py-1 rounded-md bg-white border border-gray-300 hover:border-emerald-500 font-medium text-gray-700 transition whitespace-nowrap"
           >
             📍 Bengaluru
           </button>
+          </div>
         </div>
       </div>
 
       {/* Map Canvas */}
       <div
         ref={mapContainerRef}
-        className="w-full h-[520px] sm:h-[600px] z-10"
+        className="w-full h-[400px] sm:h-[550px] lg:h-[600px] z-10"
         style={{ background: "#e5e7eb" }}
       />
     </div>

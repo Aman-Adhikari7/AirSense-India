@@ -77,7 +77,7 @@ export default function ForecastChart({ days = [], activeIndex = null, onSelectD
         </div>
 
         {currentDay && (
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
             <span className="text-gray-500 font-medium">Selected Day:</span>
             <span className="font-bold text-gray-900">
               {new Date(currentDay.date).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}

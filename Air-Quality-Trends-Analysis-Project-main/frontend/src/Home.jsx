@@ -118,12 +118,12 @@ export default function Home() {
                 navigate(`/search?q=${encodeURIComponent(search.trim())}`);
               }
             }}
-            className="mt-6 flex flex-col sm:flex-row gap-3"
+            className="mt-6 flex flex-col gap-3"
           >
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Search any state or city (e.g. Delhi, Mohali, Kharar, Mumbai, Chandigarh)..."
+                placeholder="Search any state or city (e.g. Delhi, Mohali, Mumbai)..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full px-4 py-3 pl-11 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-gray-900 placeholder-gray-400 text-sm shadow-sm"
@@ -158,7 +158,7 @@ export default function Home() {
                           </div>
                         </div>
                         <div
-                          className="px-2 py-0.5 rounded-full text-xs font-bold text-white shadow-xs"
+                          className="px-2 py-0.5 rounded-full text-xs font-bold text-white shadow-xs flex-shrink-0 ml-2"
                           style={{ backgroundColor: aqiColor }}
                         >
                           {p.aqi != null ? `AQI ${p.aqi}` : "No data"}
@@ -170,33 +170,35 @@ export default function Home() {
                     onClick={() => navigate(`/search?q=${encodeURIComponent(search.trim())}`)}
                     className="p-2.5 bg-gray-50 hover:bg-emerald-100 cursor-pointer text-center text-xs font-semibold text-emerald-800 transition"
                   >
-                    View all {filteredPlaces.length} matching stations in Search Directory →
+                    View all {filteredPlaces.length} matching stations →
                   </div>
                 </div>
               )}
             </div>
 
-            <button
-              type="submit"
-              className="px-5 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-sm font-bold shadow-sm transition"
-            >
-              Search
-            </button>
+            <div className="flex flex-row gap-2">
+              <button
+                type="submit"
+                className="flex-1 px-5 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-sm font-bold shadow-sm transition"
+              >
+                Search
+              </button>
 
-            <Link
-              to="/search"
-              className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold text-center transition flex items-center justify-center gap-1"
-            >
-              <span>Directory</span>
-              <span>→</span>
-            </Link>
+              <Link
+                to="/search"
+                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold text-center transition flex items-center justify-center gap-1"
+              >
+                <span>Directory</span>
+                <span>→</span>
+              </Link>
 
-            {data?.as_of && (
-              <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-500">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>As of: {new Date(data.as_of).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} IST</span>
-              </div>
-            )}
+              {data?.as_of && (
+                <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-500">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>As of: {new Date(data.as_of).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} IST</span>
+                </div>
+              )}
+            </div>
           </form>
         </section>
 
@@ -298,7 +300,7 @@ export default function Home() {
 
         {/* INSPECT PLACE POPUP DRAWER (When tapping a pin on the map) */}
         {inspectPlace && (
-          <section className="mb-10 bg-emerald-50/80 border-2 border-emerald-500 rounded-2xl p-6 shadow-md transition-all">
+          <section className="mb-10 bg-emerald-50/80 border-2 border-emerald-500 rounded-2xl p-4 sm:p-6 shadow-md transition-all">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -307,7 +309,7 @@ export default function Home() {
                   </span>
                   <span className="text-xs text-gray-600 font-medium">{inspectPlace.state}</span>
                 </div>
-                <h3 className="text-2xl font-black text-gray-900">{inspectPlace.name}</h3>
+                <h3 className="text-xl sm:text-2xl font-black text-gray-900">{inspectPlace.name}</h3>
                 <div className="text-xs text-gray-700 mt-1 flex flex-wrap items-center gap-2">
                   <span>📡 Station: <strong>{inspectPlace.station_name || "Continuous Monitoring Station"}</strong></span>
                   {inspectPlace.data_age_minutes != null && (
@@ -324,25 +326,25 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 self-center sm:self-auto">
+              <div className="flex items-center gap-3 self-stretch sm:self-auto justify-between sm:justify-start">
                 <div
-                  className="w-20 h-20 rounded-full flex flex-col items-center justify-center text-white font-black shadow-md text-center p-1"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex flex-col items-center justify-center text-white font-black shadow-md text-center p-1 flex-shrink-0"
                   style={{ backgroundColor: inspectPlace.color || (inspectPlace.aqi != null ? "#1E9E57" : "#BDBDBD") }}
                 >
-                  <span className="text-2xl">{inspectPlace.aqi ?? "--"}</span>
-                  <span className="text-[9px] uppercase font-bold tracking-wider leading-tight">{inspectPlace.label}</span>
+                  <span className="text-xl sm:text-2xl">{inspectPlace.aqi ?? "--"}</span>
+                  <span className="text-[8px] sm:text-[9px] uppercase font-bold tracking-wider leading-tight">{inspectPlace.label}</span>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 flex-1 sm:flex-initial">
                   <button
                     onClick={() => navigate(`/place/${inspectPlace.id}`)}
-                    className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition shadow-sm"
+                    className="w-full px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition shadow-sm text-center"
                   >
-                    View Real-Time Station Details →
+                    View Station Details →
                   </button>
                   <button
                     onClick={() => setInspectPlace(null)}
-                    className="px-3 py-1.5 bg-white border border-gray-300 text-gray-600 rounded-xl text-xs hover:bg-gray-50 transition"
+                    className="w-full px-3 py-1.5 bg-white border border-gray-300 text-gray-600 rounded-xl text-xs hover:bg-gray-50 transition text-center"
                   >
                     Close Inspector
                   </button>

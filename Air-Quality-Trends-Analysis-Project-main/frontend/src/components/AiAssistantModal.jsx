@@ -141,12 +141,12 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-semibold transition-all transform hover:scale-105"
+          className="fixed bottom-6 right-4 sm:right-6 z-50 bg-emerald-700 hover:bg-emerald-800 text-white px-3 sm:px-4 py-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-semibold transition-all transform hover:scale-105"
         >
           <span className="text-lg">&#127807;</span>
-          <span>Ask AirSense AI</span>
+          <span className="hidden sm:inline">Ask AirSense AI</span>
           {placeName && (
-            <span className="bg-emerald-800 text-[10px] px-2 py-0.5 rounded-full border border-emerald-600">
+            <span className="hidden sm:inline bg-emerald-800 text-[10px] px-2 py-0.5 rounded-full border border-emerald-600">
               {placeName}
             </span>
           )}
@@ -156,7 +156,7 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
       {/* Slide-over / Modal Chat Panel */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-xs transition-opacity">
-          <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between border-l border-gray-200">
+          <div className="w-full sm:max-w-md bg-white h-full shadow-2xl flex flex-col justify-between border-l border-gray-200">
             {/* Header */}
             <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-emerald-50/60">
               <div className="flex items-center gap-2">

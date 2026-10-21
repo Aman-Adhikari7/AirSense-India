@@ -164,32 +164,32 @@ export default function SearchPage() {
             </div>
 
             {/* Sort Options for Bar Graph */}
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="font-semibold text-gray-600">Sort by:</span>
-              <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50">
+              <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50 overflow-x-auto max-w-full">
                 <button
                   onClick={() => setStateSort("aqi_desc")}
-                  className={`px-2.5 py-1 rounded-md font-medium transition ${
+                  className={`px-2.5 py-1 rounded-md font-medium transition whitespace-nowrap ${
                     stateSort === "aqi_desc"
                       ? "bg-white text-emerald-800 shadow-xs font-bold"
                       : "text-gray-600 hover:text-gray-900"
                   }`}
                 >
-                  Most Polluted First
+                  Most Polluted
                 </button>
                 <button
                   onClick={() => setStateSort("aqi_asc")}
-                  className={`px-2.5 py-1 rounded-md font-medium transition ${
+                  className={`px-2.5 py-1 rounded-md font-medium transition whitespace-nowrap ${
                     stateSort === "aqi_asc"
                       ? "bg-white text-emerald-800 shadow-xs font-bold"
                       : "text-gray-600 hover:text-gray-900"
                   }`}
                 >
-                  Cleanest First
+                  Cleanest
                 </button>
                 <button
                   onClick={() => setStateSort("alpha")}
-                  className={`px-2.5 py-1 rounded-md font-medium transition ${
+                  className={`px-2.5 py-1 rounded-md font-medium transition whitespace-nowrap ${
                     stateSort === "alpha"
                       ? "bg-white text-emerald-800 shadow-xs font-bold"
                       : "text-gray-600 hover:text-gray-900"
