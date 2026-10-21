@@ -1,6 +1,7 @@
-from typing import Optional
+import time
+from typing import Optional, Dict, Tuple
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from ..db import get_db
 from ..schemas import AgentPlanIn, AgentPlanOut, ToolStep, AgentExecIn, AgentExecOut
@@ -17,6 +18,36 @@ from .places import _recent_rows
 public_router = APIRouter()
 router = APIRouter(dependencies=[Depends(require_user)])
 
+# Anti-abuse: 10 queries per 10 days per IP address (automatic reset after 10 days)
+_IP_CHAT_LIMITS: Dict[str, Tuple[float, int]] = {}
+CHAT_WINDOW_SECONDS = 10 * 86400  # 10 days
+MAX_CHAT_QUERIES = 10
+
+
+def _check_chat_rate_limit(request: Request):
+    """Enforce maximum 10 queries per 10 days per IP to prevent spam/abuse."""
+    client_ip = request.headers.get("x-forwarded-for")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else "unknown"
+
+    now_time = time.time()
+    if client_ip in _IP_CHAT_LIMITS:
+        start_ts, count = _IP_CHAT_LIMITS[client_ip]
+        if now_time - start_ts < CHAT_WINDOW_SECONDS:
+            if count >= MAX_CHAT_QUERIES:
+                remaining_days = max(1, int((start_ts + CHAT_WINDOW_SECONDS - now_time) // 86400) + 1)
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Question limit reached (10 queries per 10 days). Quota will automatically refresh in {remaining_days} days."
+                )
+            _IP_CHAT_LIMITS[client_ip] = (start_ts, count + 1)
+        else:
+            _IP_CHAT_LIMITS[client_ip] = (now_time, 1)
+    else:
+        _IP_CHAT_LIMITS[client_ip] = (now_time, 1)
+
 
 class ChatIn(BaseModel):
     message: str
@@ -24,7 +55,8 @@ class ChatIn(BaseModel):
 
 
 @public_router.post("/chat")
-def chat_agent(payload: ChatIn, db: Session = Depends(get_db)):
+def chat_agent(payload: ChatIn, request: Request, db: Session = Depends(get_db)):
+    _check_chat_rate_limit(request)
     context = None
     if payload.place_id:
         place = db.get(Place, payload.place_id)

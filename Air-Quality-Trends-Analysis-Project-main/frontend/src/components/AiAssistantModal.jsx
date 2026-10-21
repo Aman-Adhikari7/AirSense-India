@@ -42,37 +42,45 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
   }, [messages, isOpen]);
 
   const MAX_QUESTIONS = 10;
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const WINDOW_DAYS = 10;
+  const WINDOW_MS = WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
-  const [questionCount, setQuestionCount] = useState(() => {
+  const getStoredQuota = () => {
     try {
-      const storedDate = localStorage.getItem("airsense_query_date");
+      const storedStartTime = localStorage.getItem("airsense_query_start_time");
       const storedCount = localStorage.getItem("airsense_query_count");
-      if (storedDate === new Date().toISOString().slice(0, 10) && storedCount) {
-        return parseInt(storedCount, 10) || 0;
+      const now = Date.now();
+
+      if (storedStartTime) {
+        const startTime = parseInt(storedStartTime, 10);
+        // If 10 days have elapsed since the quota window started, automatically reset
+        if (now - startTime >= WINDOW_MS) {
+          localStorage.setItem("airsense_query_start_time", now.toString());
+          localStorage.setItem("airsense_query_count", "0");
+          return { count: 0, daysLeft: WINDOW_DAYS };
+        }
+        const count = parseInt(storedCount, 10) || 0;
+        const msRemaining = startTime + WINDOW_MS - now;
+        const daysLeft = Math.max(1, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
+        return { count, daysLeft };
       }
     } catch {}
-    return 0;
-  });
-
-  const resetQuestionLimit = () => {
-    setQuestionCount(0);
-    try {
-      localStorage.setItem("airsense_query_count", "0");
-      localStorage.setItem("airsense_query_date", todayKey);
-    } catch {}
+    return { count: 0, daysLeft: WINDOW_DAYS };
   };
+
+  const [quota, setQuota] = useState(getStoredQuota);
 
   const handleSend = async (textToSend = null) => {
     const text = textToSend || input;
     if (!text.trim() || loading) return;
 
-    if (questionCount >= MAX_QUESTIONS) {
+    const currentQuota = getStoredQuota();
+    if (currentQuota.count >= MAX_QUESTIONS) {
       setMessages((prev) => [
         ...prev,
         {
           sender: "ai",
-          text: "Daily limit of 10 questions reached on this device. The limit resets at midnight — or click Reset above.",
+          text: `Question limit reached (10 queries per 10 days on this device). Your quota will automatically refresh in ${currentQuota.daysLeft} day${currentQuota.daysLeft > 1 ? "s" : ""}.`,
         },
       ]);
       return;
@@ -81,12 +89,15 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
     const userMsg = { sender: "user", text };
     setMessages((prev) => [...prev, userMsg]);
 
-    const newCount = questionCount + 1;
-    setQuestionCount(newCount);
+    const newCount = currentQuota.count + 1;
+    const now = Date.now();
     try {
-      localStorage.setItem("airsense_query_date", todayKey);
+      if (!localStorage.getItem("airsense_query_start_time")) {
+        localStorage.setItem("airsense_query_start_time", now.toString());
+      }
       localStorage.setItem("airsense_query_count", newCount.toString());
     } catch {}
+    setQuota(getStoredQuota());
 
     if (!textToSend) setInput("");
     setLoading(true);
@@ -105,11 +116,18 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
       console.error("AI assistant error:", err);
+      const errorMsg =
+        err?.response?.status === 429
+          ? err?.response?.data?.detail || "Question limit reached (10 queries per 10 days). Quota will automatically refresh soon."
+          : "Sorry, I could not connect to the AirSense AI service right now. Please try again in a moment.";
+      if (err?.response?.status === 429) {
+        setQuota((prev) => ({ ...prev, count: MAX_QUESTIONS }));
+      }
       setMessages((prev) => [
         ...prev,
         {
           sender: "ai",
-          text: "Sorry, I could not connect to the AirSense AI service right now. Please check if the backend server is running on port 8000.",
+          text: errorMsg,
         },
       ]);
     } finally {
@@ -150,18 +168,12 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
                       <span>AI Online</span>
                       <span className="text-emerald-600">•</span>
-                      <span>{MAX_QUESTIONS - questionCount}/{MAX_QUESTIONS} left</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          resetQuestionLimit();
-                        }}
-                        className="ml-0.5 text-[9px] bg-emerald-200 hover:bg-emerald-300 text-emerald-900 px-1 py-0.2 rounded font-semibold transition"
-                        title="Reset daily question limit"
-                      >
-                        Reset
-                      </button>
+                      <span>{Math.max(0, MAX_QUESTIONS - quota.count)}/{MAX_QUESTIONS} left</span>
+                      {quota.count >= MAX_QUESTIONS && (
+                        <span className="text-amber-800 font-semibold ml-0.5">
+                          (Refreshes in {quota.daysLeft}d)
+                        </span>
+                      )}
                     </span>
                     {placeName && (
                       <span className="text-[10px] text-gray-500 font-medium truncate max-w-[120px]">
