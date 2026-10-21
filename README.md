@@ -1,18 +1,18 @@
-# 🌿 AirSense India
+# AirSense India
 
 **National Air Quality Monitoring, CPCB Station Telemetry & 5-Day AI Forecast Platform**
 
-AirSense India is a modern, full-stack ai powered environmental analytics platform that provides next 15 days prediction of aqi using ai model tracking real-time air quality across all **36 States and Union Territories** and **111 major Indian cities**. Built strictly in accordance with **Central Pollution Control Board (CPCB 2014)** standards and **Indian Standard Time (IST, UTC+5:30)**.
+AirSense India is a full-stack environmental analytics platform tracking real-time air quality across all **36 States and Union Territories** and **111 major Indian cities**, featuring 5-day predictive forecasts and extended seasonal baselines. Built strictly in accordance with **Central Pollution Control Board (CPCB 2014)** standards and **Indian Standard Time (IST, UTC+5:30)**.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 1. **Interactive National AQI Bubble Map**
    - Real-time CPCB color-coded station pins across India.
    - Interactive popups showing live AQI, monitoring station names, status category, and direct links to deep-dive analytics.
    - Quick-zoom region presets: All India, Punjab & Tricity (Mohali/Kharar/Chandigarh), Delhi NCR, Mumbai, and Bengaluru.
-   - Zero watermark, 100% free OpenStreetMap standard tiles (no API keys required).
+   - 100% free OpenStreetMap standard tiles (no API keys required).
 
    ![Home Page — India AQI Bubble Map](docs/images/home_map_overview.png)
    ![India Map — Central & Eastern States](docs/images/india_map_zoomed.png)
@@ -21,7 +21,7 @@ AirSense India is a modern, full-stack ai powered environmental analytics platfo
    - Strictly measured values from continuous ambient air monitoring stations (CAAQMS) via OpenAQ v3 and WAQI APIs.
    - Displays actual monitoring station name (e.g. *CPCB CAAQMS - Anand Vihar, Delhi*, *Sector 22 Chandigarh*, *Sector 67 Mohali*, *Kharar*).
    - Exact measurement timestamp and real-time **Data Age in minutes**.
-   - Automatic 60-second background polling with **Delayed Feed Warning (⚠️ >30 min old)**.
+   - Automatic 60-second background polling with delayed feed indicators (>30 min delay warning).
    - Zero synthetic, modeled, or fake AQI values on live dashboards.
 
    ![Featured Real-Time Monitoring Stations](docs/images/featured_stations.png)
@@ -50,15 +50,15 @@ AirSense India is a modern, full-stack ai powered environmental analytics platfo
 
 6. **AirSense AI Assistant**
    - Built-in conversational assistant answering queries about pollution sources, health advisories, and local air quality.
-   - Daily device tracking (10 free queries per session/day via local storage).
+   - Automatic quota management (10 queries per 10-day window per device).
 
    ![Search Page with AI Assistant Panel](docs/images/search_ai_assistant.png)
 
 ---
 
-## 🧠 AI Architecture, Forecasting Models & Data Pipeline
+## Architecture, Forecasting Models & Data Pipeline
 
-AirSense India uses a specialized multi-tiered machine learning and statistical modeling pipeline designed specifically for the Indian atmospheric and cultural calendar:
+AirSense India uses a multi-tiered machine learning and statistical modeling pipeline designed specifically for Indian atmospheric patterns and seasonal events:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────┐
@@ -96,16 +96,16 @@ AirSense India uses a specialized multi-tiered machine learning and statistical 
 │  3. AirSense Conversational AI Assistant                                       │
 │     • Natural Language interface answering air quality & health questions      │
 │     • Injects live station telemetry directly into model context               │
-│     • Session/device rate limiting: 10 queries per day via localStorage        │
+│     • Anti-abuse limit: 10 queries per 10 days per device                      │
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Detailed AI & Data Specifications:
+### Technical Details:
 
 1. **Station Telemetry & Ingestion**:
-   - **Ground Sensors (No Forecasts for Live AQI)**: Live data is fetched from official Continuous Ambient Air Quality Monitoring Stations (CAAQMS).
+   - **Ground Sensors**: Live data is fetched from official Continuous Ambient Air Quality Monitoring Stations (CAAQMS).
    - **Failover Hierarchy**: Queries **OpenAQ v3** first (`/locations/{id}/latest`). If unavailable, automatically falls back to **WAQI** geo-coordinates (`/feed/geo:{lat};{lon}/`).
-   - **Staleness Control**: Every measurement includes an explicit timestamp. Readings older than 30 minutes trigger a `⚠️ >30 min delay` warning. Background polling occurs every 60 seconds.
+   - **Staleness Control**: Every measurement includes an explicit timestamp. Readings older than 30 minutes display a delayed status warning. Background polling occurs every 60 seconds.
 
 2. **Official CPCB 2014 AQI Mathematics**:
    The AQI is computed using the piecewise linear interpolation formula:
@@ -113,15 +113,15 @@ AirSense India uses a specialized multi-tiered machine learning and statistical 
    Sub-indices are computed separately for $PM_{2.5}$ and $PM_{10}$, and the governing AQI is the maximum sub-index: $\text{AQI} = \max(I_{PM2.5}, I_{PM10})$.
 
 3. **Festival & Seasonal Machine Learning (`FestivalModel`)**:
-   Standard time-series models (ARIMA/SARIMAX) fail during Indian winters because firecracker combustion during **Diwali** and seasonal **paddy stubble burning** cause non-linear multi-fold spikes. The Gradient Boosting model solves this by learning non-linear relative multiplier effects from historical festival proximity features.
+   Standard time-series models (ARIMA/SARIMAX) struggle with Indian winter spikes because firecracker combustion during **Diwali** and seasonal **paddy stubble burning** cause non-linear multi-fold spikes. The Gradient Boosting model handles this by learning relative multiplier effects from historical festival proximity features.
 
 ---
 
-## 🚀 How to Run the Project
+## Getting Started
 
 ### Prerequisites
-- **Python 3.10+** (Check via `python --version` or `python3 --version`)
-- **Node.js 18+** & **npm** (Check via `node -v` and `npm -v`)
+- **Python 3.10+** (`python --version` or `python3 --version`)
+- **Node.js 18+** & **npm** (`node -v` and `npm -v`)
 
 ### Step 0: Clone the Repository
 ```bash
@@ -131,16 +131,16 @@ cd AirSense-India
 
 ---
 
-### 🪟 Windows Setup & Run
+### Windows Setup
 
-#### Option A: One-Click Launcher (Recommended for Windows)
-From the project folder, simply double-click or run:
+#### Option A: One-Click Launcher
+From the project folder, run:
 ```cmd
 start_local_dev.bat
 ```
-*This automatically launches both the FastAPI backend on port 8000 and the Vite frontend on port 5173 in separate command windows.*
+*This starts both the FastAPI backend on port 8000 and the Vite frontend on port 5173 in separate command windows.*
 
-#### Option B: Manual Windows Terminal
+#### Option B: Manual Terminal Setup
 
 **Terminal 1 — Backend (FastAPI):**
 ```cmd
@@ -160,7 +160,7 @@ npm run dev
 
 ---
 
-### 🍎 macOS & Linux Setup & Run
+### macOS & Linux Setup
 
 Open two terminal tabs in the cloned `AirSense-India` directory:
 
@@ -182,17 +182,17 @@ npm run dev
 
 ---
 
-### 🌐 Accessing the Application
+### Accessing the Application
 
 Once both servers are running:
-- **Interactive Web Dashboard:** [http://localhost:5173](http://localhost:5173)
+- **Web Dashboard:** [http://localhost:5173](http://localhost:5173)
 - **API Documentation (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
 - **Backend Health Check:** [http://localhost:8000/healthz](http://localhost:8000/healthz)
 
 ---
 
-### 📦 Optional: Production Build (Single-Port Serving)
-You can also compile the frontend so the FastAPI backend serves both the API and UI directly on port 8000:
+### Production Build (Optional)
+To build the frontend for production and serve everything from FastAPI on port 8000:
 
 **On Windows:**
 ```cmd
@@ -210,38 +210,38 @@ Once built, open [http://localhost:8000/](http://localhost:8000/) in your browse
 
 ---
 
-## ⚙️ Configuration & API Keys (.env)
+## Configuration & API Keys
 
-> [!IMPORTANT]
+> [!NOTE]
 > **API Key Setup for Live Ground Station Streaming:**
-> - To fetch **real-time live station measurements directly from the sensors**, you need a free API key from either **OpenAQ** or **WAQI** (both take 30 seconds to get for free):
->   1. **OpenAQ v3 Key (Preferred)**: Register free at [explore.openaq.org](https://explore.openaq.org) $\rightarrow$ copy your key.
->   2. **WAQI Token (Fallback)**: Enter your email at [aqicn.org/data-platform/token](https://aqicn.org/data-platform/token/) $\rightarrow$ token is sent instantly.
+> - To fetch **real-time live station measurements directly from sensors**, you can use a free API key from either **OpenAQ** or **WAQI**:
+>   1. **OpenAQ v3 Key (Preferred)**: Register at [explore.openaq.org](https://explore.openaq.org) to obtain an API key.
+>   2. **WAQI Token (Fallback)**: Request a free token at [aqicn.org/data-platform/token](https://aqicn.org/data-platform/token/).
 > - Add your key(s) to `backend/.env`:
 >   ```ini
 >   OPENAQ_API_KEY=your_actual_openaq_api_key_here
 >   WAQI_TOKEN=your_actual_waqi_token_here
 >   ```
 > - **Running Without API Keys (Offline Evaluation Mode):**
->   If you clone and run without adding API keys, the application automatically uses the included pre-seeded SQLite database (`airq.db`). All 111 catalogue cities and official CPCB monitoring stations will still display so you can immediately explore and evaluate the UI, maps, charts, and forecasts!
+>   If you run without API keys, the application automatically uses the included pre-seeded SQLite database (`airq.db`). All 111 catalogue cities and official CPCB monitoring stations will still display for evaluation.
 
-### 🤖 Enabling Full Conversational AI (Groq / Grok / Llama 3.3):
+### Conversational AI Assistant Setup
 
-By default, **AirSense AI operates in Offline Database Mode** without needing any API keys. In offline mode, it answers directly from its internal database and algorithmic models:
-- 📍 **City AQI Telemetry:** Look up real-time AQI and PM2.5/PM10 readings for any of the 111 catalogue cities.
-- 🗺️ **State AQI Summaries:** Queries all 36 States & UTs (e.g. *"What is the AQI in UP?"*, *"Punjab"*, *"Maharashtra"*), calculating state-level averages and listing top polluted cities.
-- 📈 **5-Day Forecast Architecture:** Explains the HistGradientBoosting ML model, festival proximity multipliers, and stubble burning cycles.
-- 🌫️ **Winter Smog & Stubble Science:** Breaks down thermal inversion, calm winds, and transboundary smoke transport across the Indo-Gangetic Plains.
-- 😷 **CPCB Health Guidance:** Clear advisories on N95 respirators, outdoor exercise/jogging safety thresholds, and vulnerable population precautions.
+By default, **AirSense AI operates in Offline Database Mode** without needing external LLM API keys. In offline mode, it answers directly from its internal database and algorithmic models:
+- **City AQI Telemetry:** Real-time AQI and PM2.5/PM10 readings for any of the 111 catalogue cities.
+- **State AQI Summaries:** Queries all 36 States & UTs (e.g. *"What is the AQI in UP?"*, *"Punjab"*, *"Maharashtra"*), calculating state-level averages and listing top polluted cities.
+- **5-Day Forecast Architecture:** Explains the HistGradientBoosting ML model, festival proximity multipliers, and stubble burning cycles.
+- **Winter Smog & Stubble Science:** Explains thermal inversion, calm winds, and transboundary smoke transport across the Indo-Gangetic Plains.
+- **CPCB Health Guidance:** Clear advisories on N95 respirators, outdoor exercise thresholds, and vulnerable population precautions.
 
-**To enable open-ended conversation (like ChatGPT / Grok):**
-1. Get a **free API key** from [Groq Console](https://console.groq.com/keys) (takes 30 seconds, no credit card required).
+**To enable open-ended conversation with LLM providers:**
+1. Get a free API key from [Groq Console](https://console.groq.com/keys).
 2. Open `backend/.env` and set:
    ```ini
    LLM_API_KEY=gsk_your_actual_groq_api_key_here
    LLM_MODEL=llama-3.3-70b-versatile
    ```
-3. Restart the backend. The AI Assistant will now respond with ultra-fast, intelligent conversational answers powered by Llama 3.3 70B!
+3. Restart the backend.
 
 ### Example `backend/.env` Configuration:
 
@@ -252,11 +252,11 @@ AUTO_CREATE_TABLES=true
 AUTO_SEED_PLACES=true
 ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,http://127.0.0.1:8000
 
-# 📡 Real-Time Ground Monitoring Station APIs (Free Registration):
+# Real-Time Ground Monitoring Station APIs:
 OPENAQ_API_KEY=               # Free at https://explore.openaq.org
 WAQI_TOKEN=                   # Free at https://aqicn.org/data-platform/token/
 
-# 🤖 AirSense Conversational AI Assistant:
+# AirSense Conversational AI Assistant:
 AGENT_ENABLED=true
 LLM_API_KEY=                  # Free at https://console.groq.com/keys
 LLM_BASE_URL=https://api.groq.com/openai/v1
@@ -265,7 +265,7 @@ LLM_MODEL=llama-3.3-70b-versatile
 
 ---
 
-## 📊 CPCB Air Quality Index Breakpoints
+## CPCB Air Quality Index Breakpoints
 
 Calculated using the official Indian CPCB 2014 linear interpolation standard for 24-hour PM2.5 and PM10:
 
@@ -280,7 +280,7 @@ Calculated using the official Indian CPCB 2014 linear interpolation standard for
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 air_quality/
@@ -324,7 +324,7 @@ air_quality/
 
 ---
 
-## 📜 License & Acknowledgments
+## License & Acknowledgments
 
 - **License:** Open Source under the MIT License.
 - **Data Attributions:**
