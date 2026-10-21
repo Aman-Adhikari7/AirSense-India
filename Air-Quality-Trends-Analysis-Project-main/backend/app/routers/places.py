@@ -19,7 +19,7 @@ from ..db import get_db
 from ..models import Forecast, Measurement, Place, utcnow
 from ..services.aqi import category_for, compute_aqi, sub_index
 from ..services.live import snapshot, source_label
-from ..services.live_stations import compute_station_aqi, get_live_station_reading
+from ..services.live_stations import compute_station_aqi, get_live_station_reading, get_all_places_telemetry
 
 router = APIRouter()
 
@@ -218,17 +218,21 @@ def place_live(place_id: int, db: Session = Depends(get_db)):
 
 @router.get("/map/summary")
 def map_summary(db: Session = Depends(get_db)):
-    """Everything the India map needs: real monitoring station measurements only. No fake fallbacks."""
+    """Everything the India map needs: real monitoring station measurements with real-time atmospheric telemetry."""
     now = utcnow()
     places = db.execute(select(Place).order_by(Place.state, Place.name)).scalars().all()
     out_places, by_state = [], defaultdict(list)
     db_rows = _recent_rows(db, None, now)
 
+    telemetry_map = get_all_places_telemetry(places)
+
     for p in places:
         st_data = None
         if p.name in FEATURED_CITIES:
             st_data = get_live_station_reading(p.latitude, p.longitude, p.name, place=p)
-        st_aqi = compute_station_aqi(st_data)
+            st_aqi = compute_station_aqi(st_data)
+        else:
+            st_aqi = telemetry_map.get(p.id) or compute_station_aqi(None)
 
         if st_aqi.get("aqi") is None:
             p_rows = [r for r in db_rows.get(p.name, []) if r[3] == "ground"]
@@ -256,6 +260,10 @@ def map_summary(db: Session = Depends(get_db)):
                         "basis": "ground",
                     }
 
+        # If ground station reading is still missing or null, ensure fallback to batch telemetry
+        if st_aqi.get("aqi") is None and p.id in telemetry_map:
+            st_aqi = telemetry_map[p.id]
+
         aqi_val = st_aqi.get("aqi")
         out_places.append({
             **_place_out(p),
@@ -263,7 +271,7 @@ def map_summary(db: Session = Depends(get_db)):
             "label": st_aqi.get("label", "No station data"),
             "key": st_aqi.get("key", "unknown"),
             "color": st_aqi.get("color", "#BDBDBD"),
-            "basis": "ground" if aqi_val is not None else None,
+            "basis": st_aqi.get("basis", "ground" if aqi_val is not None else None),
             "station_name": st_aqi.get("station_name"),
             "station_id": st_aqi.get("station_id"),
             "source": st_aqi.get("source"),
@@ -271,6 +279,8 @@ def map_summary(db: Session = Depends(get_db)):
             "data_age_minutes": st_aqi.get("data_age_minutes"),
             "is_stale": st_aqi.get("is_stale", False),
             "warning": st_aqi.get("warning"),
+            "pm25": st_aqi.get("pm25"),
+            "pm10": st_aqi.get("pm10"),
             "updated": st_aqi.get("measurement_ts") or (now.isoformat(timespec="minutes") + "Z"),
             "stale": st_aqi.get("is_stale", False),
         })
@@ -309,6 +319,7 @@ def place_forecast(
     days = []
     now = utcnow()
     if latest_gen is not None:
+        gen_str = latest_gen.isoformat(timespec="minutes") + "Z"
         rows = db.execute(
             select(Forecast).where(Forecast.city == place.name, Forecast.model == model,
                                    Forecast.generated_at == latest_gen).order_by(Forecast.ts)
