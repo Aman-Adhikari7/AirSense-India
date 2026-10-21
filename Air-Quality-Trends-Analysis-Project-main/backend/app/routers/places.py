@@ -201,7 +201,9 @@ def map_summary(db: Session = Depends(get_db)):
     db_rows = _recent_rows(db, None, now)
 
     for p in places:
-        st_data = get_live_station_reading(p.latitude, p.longitude, p.name, place=p)
+        st_data = None
+        if p.name in FEATURED_CITIES:
+            st_data = get_live_station_reading(p.latitude, p.longitude, p.name, place=p)
         st_aqi = compute_station_aqi(st_data)
 
         if st_aqi.get("aqi") is None:
