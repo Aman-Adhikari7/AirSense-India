@@ -65,22 +65,26 @@ def fetch_waqi_station(lat: float, lon: float, city_name: Optional[str] = None) 
         return None
 
     headers = {"User-Agent": "AirSenseIndia/1.0"}
-    url = f"{WAQI_BASE}/feed/geo:{lat:.4f};{lon:.4f}/"
     try:
-        r = requests.get(url, params={"token": token}, headers=headers, timeout=10)
-        if r.status_code != 200:
+        payload = None
+        if city_name:
+            # Query official city station feed directly
+            clean_city = city_name.strip().lower()
+            # Handle Tricity aliases if needed
+            if clean_city in ["mohali", "kharar"]:
+                clean_city = "chandigarh"
+            cr = requests.get(f"{WAQI_BASE}/feed/{requests.utils.quote(clean_city)}/", params={"token": token}, headers=headers, timeout=8)
+            if cr.status_code == 200 and cr.json().get("status") == "ok" and cr.json().get("data"):
+                payload = cr.json()
+
+        if not payload or payload.get("status") != "ok":
+            url = f"{WAQI_BASE}/feed/geo:{lat:.4f};{lon:.4f}/"
+            r = requests.get(url, params={"token": token}, headers=headers, timeout=8)
+            if r.status_code == 200 and r.json().get("status") == "ok" and r.json().get("data"):
+                payload = r.json()
+
+        if not payload or payload.get("status") != "ok" or not payload.get("data"):
             return None
-        payload = r.json()
-        if payload.get("status") != "ok" or not payload.get("data"):
-            # If geo fails, try city name query
-            if city_name:
-                cr = requests.get(f"{WAQI_BASE}/feed/{requests.utils.quote(city_name)}/", params={"token": token}, headers=headers, timeout=10)
-                if cr.status_code == 200 and cr.json().get("status") == "ok":
-                    payload = cr.json()
-                else:
-                    return None
-            else:
-                return None
 
         data = payload.get("data")
         if not isinstance(data, dict):

@@ -444,28 +444,35 @@ def chat_with_llm(user_message: str, context: dict = None) -> tuple[str, str]:
 
     # 1. Try Hosted LLM API (e.g. Groq, OpenRouter, OpenAI) if key is provided
     if settings.LLM_API_KEY:
-        try:
-            url = f"{settings.LLM_BASE_URL.rstrip('/')}/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {settings.LLM_API_KEY}",
-                "Content-Type": "application/json",
-            }
-            payload = {
-                "model": settings.LLM_MODEL,
-                "messages": [
-                    {"role": "system", "content": sys_prompt},
-                    {"role": "user", "content": user_message},
-                ],
-                "temperature": 0.3,
-                "max_tokens": 600,
-            }
-            r = requests.post(url, headers=headers, json=payload, timeout=20)
-            if r.status_code == 200:
-                data = r.json()
-                reply = data["choices"][0]["message"]["content"]
-                return reply.strip(), f"api:{settings.LLM_MODEL}"
-        except Exception:
-            pass
+        models_to_try = [settings.LLM_MODEL]
+        for alt in ["qwen/qwen3.8-27b", "llama-3.3-70b-versatile", "openai/gpt-oss-120b"]:
+            if alt not in models_to_try:
+                models_to_try.append(alt)
+
+        url = f"{settings.LLM_BASE_URL.rstrip('/')}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {settings.LLM_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        for model_name in models_to_try:
+            try:
+                payload = {
+                    "model": model_name,
+                    "messages": [
+                        {"role": "system", "content": sys_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 600,
+                }
+                r = requests.post(url, headers=headers, json=payload, timeout=20)
+                if r.status_code == 200:
+                    data = r.json()
+                    reply = data["choices"][0]["message"]["content"]
+                    return reply.strip(), f"groq:{model_name}"
+            except Exception:
+                pass
+
 
     # 2. Try Local Ollama if available
     try:
