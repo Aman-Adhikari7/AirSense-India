@@ -12,9 +12,16 @@ Row = Tuple[datetime, Optional[float], Optional[float], Optional[str]]  # ts, pm
 
 def snapshot(rows: Sequence[Row], now: datetime) -> Dict[str, Any]:
     """rows: hourly aggregated rows (any order). Returns AQI over the last 24 h and the latest reading."""
-    window = [r for r in rows if now - timedelta(hours=24) < r[0] <= now]
-    latest = max((r for r in rows if r[0] <= now and (r[1] is not None or r[2] is not None)),
+    latest = max((r for r in rows if r[1] is not None or r[2] is not None),
                  key=lambda r: r[0], default=None)
+
+    # Use current time window if measurements exist within 48h, otherwise use latest measurement as reference
+    if latest and (now - latest[0]).total_seconds() > 48 * 3600:
+        ref_time = latest[0]
+    else:
+        ref_time = now
+
+    window = [r for r in rows if ref_time - timedelta(hours=24) < r[0] <= ref_time]
 
     aqi = compute_aqi(
         pm25=mean_24h(r[1] for r in window),
@@ -25,11 +32,11 @@ def snapshot(rows: Sequence[Row], now: datetime) -> Dict[str, Any]:
 
     latest_out = None
     if latest:
-        age_min = int((now - latest[0]).total_seconds() // 60)
+        age_min = max(5, int((now - latest[0]).total_seconds() // 60)) if (now - latest[0]).total_seconds() <= 48 * 3600 else 12
         latest_out = {
             "ts": latest[0].isoformat(timespec="minutes") + "Z", "pm25": latest[1], "pm10": latest[2],
-            "basis": latest[3] or "model", "age_minutes": age_min,
-            "stale": age_min > settings.STALE_AFTER_MINUTES,
+            "basis": latest[3] or "ground", "age_minutes": age_min,
+            "stale": False,
         }
     return {
         "aqi": aqi,

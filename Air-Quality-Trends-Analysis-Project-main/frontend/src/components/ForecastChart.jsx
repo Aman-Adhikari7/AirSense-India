@@ -9,10 +9,10 @@ export default function ForecastChart({ days = [], activeIndex = null, onSelectD
   const currentDay = days[currentIndex] || days[0];
 
   // Canvas bounds
-  const width = 640;
+  const width = 680;
   const height = 240;
   const padLeft = 45;
-  const padRight = 35;
+  const padRight = 78;  // extra space for threshold labels on right
   const padTop = 30;
   const padBottom = 40;
 
@@ -51,13 +51,13 @@ export default function ForecastChart({ days = [], activeIndex = null, onSelectD
     "Z",
   ].join(" ");
 
-  // Threshold lines to display
+  // Threshold lines to display — short labels to avoid clipping
   const thresholds = [
-    { val: 50, label: "Good (50)", color: "#1E9E57" },
-    { val: 100, label: "Satisfactory (100)", color: "#8BC34A" },
-    { val: 200, label: "Moderate (200)", color: "#F4C20D" },
-    { val: 300, label: "Poor (300)", color: "#F28C28" },
-    { val: 400, label: "Very Poor (400)", color: "#D32F2F" },
+    { val: 50, label: "Good", color: "#1E9E57" },
+    { val: 100, label: "Satisf.", color: "#8BC34A" },
+    { val: 200, label: "Moderate", color: "#F4C20D" },
+    { val: 300, label: "Poor", color: "#F28C28" },
+    { val: 400, label: "V.Poor", color: "#D32F2F" },
   ].filter((t) => t.val >= minVal && t.val <= maxVal);
 
   const activeP = points[currentIndex] || points[0];
@@ -232,21 +232,22 @@ export default function ForecastChart({ days = [], activeIndex = null, onSelectD
                   {p.aqi}
                 </text>
 
-                {/* X-Axis Date / Day Label */}
-                <text
-                  x={p.x}
-                  y={padTop + chartH + 18}
-                  textAnchor="middle"
-                  fontSize="9.5"
-                  fontWeight={isSelected ? "700" : "500"}
-                  fill={isSelected ? "#111827" : "#6B7280"}
-                >
-                  {new Date(p.date).toLocaleDateString("en-IN", {
-                    weekday: days.length <= 7 ? "short" : undefined,
-                    day: "numeric",
-                    month: "short",
-                  })}
-                </text>
+                {/* X-Axis Date / Day Label — skip some if too crowded */}
+                {(days.length <= 10 || i % Math.ceil(days.length / 10) === 0 || i === days.length - 1) && (
+                  <text
+                    x={p.x}
+                    y={padTop + chartH + 18}
+                    textAnchor="middle"
+                    fontSize="8.5"
+                    fontWeight={isSelected ? "700" : "500"}
+                    fill={isSelected ? "#111827" : "#6B7280"}
+                  >
+                    {new Date(p.date).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </text>
+                )}
               </g>
             );
           })}

@@ -125,6 +125,20 @@ def _recent_rows(db: Session, city_names, now):
     by_city = defaultdict(list)
     for city, ts, pm25, pm10, basis in db.execute(q):
         by_city[city].append((ts, pm25, pm10, basis))
+
+    # Fallback: if database measurements are older than 48h (e.g. offline archive or seeded DB),
+    # query the most recent 48h window available in the database
+    if not by_city:
+        max_ts = db.execute(select(func.max(Measurement.ts))).scalar()
+        if max_ts:
+            fallback_since = max_ts - timedelta(hours=48)
+            q_fb = select(Measurement.city, Measurement.ts, Measurement.pm25, Measurement.pm10, Measurement.basis).where(
+                Measurement.source == "aggregated", Measurement.ts >= fallback_since, Measurement.ts <= max_ts)
+            if city_names is not None:
+                q_fb = q_fb.where(Measurement.city.in_(city_names))
+            for city, ts, pm25, pm10, basis in db.execute(q_fb):
+                by_city[city].append((ts, pm25, pm10, basis))
+
     return by_city
 
 

@@ -16,14 +16,15 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
     {
       sender: "ai",
       text:
-        "Hello! I am **AirSense AI**, your environmental assistant (currently in **Offline Database Mode**).\n\n" +
-        "📚 **What I can answer from our local system:**\n" +
-        "• **City AQI Lookups:** *\"What is the AQI in Chandigarh?\"*, *\"Delhi air quality\"*, *\"Mohali\"*, *\"Mumbai\"*\n" +
-        "• **State AQI Lookups:** *\"What is the AQI in UP?\"*, *\"Punjab\"*, *\"Haryana\"*, *\"Maharashtra\"*\n" +
-        "• **AI Forecast Models:** *\"How are you predicting the 5-day forecast?\"*\n" +
-        "• **Winter Smog & Stubble:** *\"Why is air quality in Delhi high during winter?\"*\n" +
-        "• **Health Precautions:** *\"N95 mask advice\"*, *\"Safe jogging AQI\"*, *\"Diwali precautions\"*\n\n" +
-        "💡 *Tip: For open-ended conversation like ChatGPT or Grok, add a free Groq key (`LLM_API_KEY`) to `backend/.env`!*",
+        "Hello! I am AirSense AI — your intelligent air quality assistant for India, powered by Groq AI.\n\n" +
+        "I can help you with:\n" +
+        "• Live City AQI — \"What is the AQI in Chandigarh?\", \"Delhi air quality\", \"Mumbai pollution\"\n" +
+        "• State-level AQI — \"AQI in UP?\", \"Punjab air quality\", \"Maharashtra\"\n" +
+        "• AI Forecast — \"How are you predicting the 5-day forecast?\"\n" +
+        "• Delhi Smog & Winter — \"Why is air quality in Delhi worse in winter?\"\n" +
+        "• Festivals & Stubble — \"Diwali smog\", \"stubble burning Punjab\"\n" +
+        "• Health Advice — \"N95 mask advice\", \"Is it safe to jog with AQI 150?\"\n\n" +
+        "Or just ask me anything about India's air quality!",
     },
   ]);
   const [input, setInput] = useState("");
@@ -43,7 +44,16 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
   const MAX_QUESTIONS = 10;
   const todayKey = new Date().toISOString().slice(0, 10);
 
-  const [questionCount, setQuestionCount] = useState(0);
+  const [questionCount, setQuestionCount] = useState(() => {
+    try {
+      const storedDate = localStorage.getItem("airsense_query_date");
+      const storedCount = localStorage.getItem("airsense_query_count");
+      if (storedDate === new Date().toISOString().slice(0, 10) && storedCount) {
+        return parseInt(storedCount, 10) || 0;
+      }
+    } catch {}
+    return 0;
+  });
 
   const resetQuestionLimit = () => {
     setQuestionCount(0);
@@ -62,7 +72,7 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
         ...prev,
         {
           sender: "ai",
-          text: "⚠️ **Daily Device Limit Reached:** You have reached your limit of 10 free AI questions on this device for today. The limit resets at midnight, or you can log in for unlimited access.",
+          text: "Daily limit of 10 questions reached on this device. The limit resets at midnight — or click Reset above.",
         },
       ]);
       return;
@@ -70,7 +80,7 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
 
     const userMsg = { sender: "user", text };
     setMessages((prev) => [...prev, userMsg]);
-    
+
     const newCount = questionCount + 1;
     setQuestionCount(newCount);
     try {
@@ -99,7 +109,7 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
         ...prev,
         {
           sender: "ai",
-          text: "⚠️ Sorry, I could not connect to the AirSense AI service right now. Please check if the backend is running.",
+          text: "Sorry, I could not connect to the AirSense AI service right now. Please check if the backend server is running on port 8000.",
         },
       ]);
     } finally {
@@ -115,7 +125,7 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 z-50 bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-semibold transition-all transform hover:scale-105"
         >
-          <span className="text-lg">🌿</span>
+          <span className="text-lg">&#127807;</span>
           <span>Ask AirSense AI</span>
           {placeName && (
             <span className="bg-emerald-800 text-[10px] px-2 py-0.5 rounded-full border border-emerald-600">
@@ -132,12 +142,15 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
             {/* Header */}
             <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-emerald-50/60">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🌿</span>
+                <span className="text-xl">&#127807;</span>
                 <div>
                   <h3 className="font-bold text-gray-900 text-sm">AirSense AI Assistant</h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <span>{MAX_QUESTIONS - questionCount} / {MAX_QUESTIONS} left</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                      <span>Groq AI Connected</span>
+                      <span className="text-emerald-600">•</span>
+                      <span>{MAX_QUESTIONS - questionCount}/{MAX_QUESTIONS} left</span>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -162,15 +175,17 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
                 onClick={() => setIsOpen(false)}
                 className="text-gray-400 hover:text-gray-700 text-xl font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100"
               >
-                ✕
+                &#x2715;
               </button>
             </div>
 
-            {/* Offline Mode Banner */}
-            <div className="bg-amber-50 border-b border-amber-200 px-3.5 py-2 text-[11px] text-amber-900 flex items-start gap-2">
-              <span className="text-amber-600 text-sm leading-none mt-0.5">⚠️</span>
+            {/* Groq Active Banner */}
+            <div className="bg-emerald-50 border-b border-emerald-200 px-3.5 py-2 text-[11px] text-emerald-900 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block flex-shrink-0"></span>
               <div className="leading-tight">
-                <span className="font-bold text-amber-950">Offline Database Mode:</span> Answering from local 111-city AQI database & environmental models. For full conversational AI (like ChatGPT / Grok), connect a free Groq key in <code className="bg-amber-100 text-amber-950 px-1 py-0.5 rounded font-mono text-[10px]">backend/.env</code>.
+                <span className="font-bold text-emerald-800">Groq AI Active</span>
+                {" — "}Powered by <code className="bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded font-mono text-[10px]">qwen/qwen3.8-27b</code>.
+                Ask any air quality question, health advice, or city AQI.
               </div>
             </div>
 
