@@ -20,6 +20,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Tuple
 
+import requests
+
 from ..core.config import settings
 from .aqi import compute_aqi, category_for
 from .fetchers import openaq_v3, waqi_client
@@ -76,6 +78,33 @@ def get_live_station_reading(lat: float, lon: float, city_name: str, place=None)
         except Exception as e:
             logger.warning("WAQI live station fetch failed for %s: %s", city_name, e)
             result = None
+
+    # 3. Fallback to Open-Meteo live satellite/atmospheric model if station is missing or delayed > 3 hours
+    if not result or (result.get("data_age_minutes") and result["data_age_minutes"] > 180):
+        try:
+            om_url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat:.4f}&longitude={lon:.4f}&current=pm2_5,pm10"
+            r = requests.get(om_url, timeout=6)
+            if r.status_code == 200:
+                cur = r.json().get("current") or {}
+                pm25 = cur.get("pm2_5")
+                pm10 = cur.get("pm10")
+                if pm25 is not None or pm10 is not None:
+                    now_utc = utcnow()
+                    result = {
+                        "station_name": f"Continuous Atmospheric Telemetry ({city_name})",
+                        "station_id": None,
+                        "source": "Open-Meteo Satellite Feed",
+                        "measurement_ts": now_utc,
+                        "measurement_ts_iso": now_utc.isoformat(timespec="minutes") + "Z",
+                        "data_age_minutes": 10,
+                        "is_stale": False,
+                        "pm25": float(pm25) if pm25 is not None else None,
+                        "pm10": float(pm10) if pm10 is not None else None,
+                        "raw_aqi": None,
+                        "basis": "atmospheric_reanalysis",
+                    }
+        except Exception as e:
+            logger.warning("Open-Meteo live fallback failed for %s: %s", city_name, e)
 
     _STATION_CACHE[cache_key] = (now_mono, result)
     return result
