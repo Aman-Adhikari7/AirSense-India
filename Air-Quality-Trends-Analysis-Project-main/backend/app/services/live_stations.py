@@ -79,8 +79,8 @@ def get_live_station_reading(lat: float, lon: float, city_name: str, place=None)
             logger.warning("WAQI live station fetch failed for %s: %s", city_name, e)
             result = None
 
-    # 3. Fallback to Open-Meteo live satellite/atmospheric model if station is missing or delayed > 3 hours
-    if not result or (result.get("data_age_minutes") and result["data_age_minutes"] > 180):
+    # 3. Fallback to Open-Meteo live satellite/atmospheric model if station is missing or delayed > 2 days (2880 min)
+    if not result or (result.get("data_age_minutes") and result["data_age_minutes"] > 2880):
         try:
             om_url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat:.4f}&longitude={lon:.4f}&current=pm2_5,pm10"
             r = requests.get(om_url, timeout=6)
