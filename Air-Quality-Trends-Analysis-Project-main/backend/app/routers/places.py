@@ -5,6 +5,7 @@ They only read what the scheduled jobs stored, so they are cheap and safe to exp
 """
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Optional
@@ -17,10 +18,11 @@ from ..data.festivals import upcoming
 from ..data.health_effects import health_payload
 from ..db import get_db
 from ..models import Forecast, Measurement, Place, utcnow
-from ..services.aqi import category_for, compute_aqi, sub_index
+from ..services.aqi import category_for, compute_aqi, compute_us_aqi, sub_index
 from ..services.live import snapshot, source_label
 from ..services.live_stations import compute_station_aqi, get_live_station_reading, get_all_places_telemetry
 
+logger = logging.getLogger("airq.places")
 router = APIRouter()
 
 FORECAST_MODEL = "festival-gbm"
@@ -325,37 +327,95 @@ def place_forecast(
                                    Forecast.generated_at == latest_gen).order_by(Forecast.ts)
         ).scalars().all()
         for r in rows:
-            a = compute_aqi(pm25=r.yhat)
-            lo, hi = sub_index("pm25", r.yhat_lower), sub_index("pm25", r.yhat_upper)
+            aqi = compute_us_aqi(pm25=r.yhat)
+            lo = compute_us_aqi(pm25=r.yhat_lower)
+            hi = compute_us_aqi(pm25=r.yhat_upper)
             days.append({"date": r.ts.date().isoformat(), "pm25": round(r.yhat, 1),
                          "pm25_low": round(r.yhat_lower, 1), "pm25_high": round(r.yhat_upper, 1),
-                         "aqi": a["aqi"], "aqi_low": lo, "aqi_high": hi, **category_for(a["aqi"])})
+                         "aqi": aqi, "aqi_low": lo, "aqi_high": hi, **category_for(aqi)})
     else:
         import math
-        db_rows = _recent_rows(db, [place.name], now).get(place.name, [])
-        ground_recent = [r[1] for r in db_rows if r[1] is not None]
-        base_pm = float(sum(ground_recent) / len(ground_recent)) if ground_recent else 45.0
+        import requests as _req
+
+        # ── Fetch Open-Meteo 6-day hourly air-quality forecast ────────────────
+        om_url = (
+            f"https://air-quality-api.open-meteo.com/v1/air-quality"
+            f"?latitude={place.latitude:.4f}&longitude={place.longitude:.4f}"
+            f"&hourly=pm2_5,pm10&timezone=Asia/Kolkata&forecast_days=6"
+        )
+        try:
+            om_resp = _req.get(om_url, timeout=10)
+            om_data = om_resp.json() if om_resp.status_code == 200 else {}
+        except Exception as _e:
+            logger.warning("Open-Meteo forecast fetch failed for %s: %s", place.name, _e)
+            om_data = {}
+
+        hourly = om_data.get("hourly", {})
+        times  = hourly.get("time", [])
+        pm25s  = hourly.get("pm2_5", [])
+        pm10s  = hourly.get("pm10", [])
+
+        # Group hourly values by date string
+        by_day: dict = {}
+        for t, p25, p10 in zip(times, pm25s, pm10s):
+            d_str = t[:10]
+            if p25 is not None:
+                by_day.setdefault(d_str, {"pm25": [], "pm10": []})["pm25"].append(p25)
+            if p10 is not None:
+                by_day.setdefault(d_str, {"pm25": [], "pm10": []})["pm10"].append(p10)
+
+        # Current live reading as fallback base
+        live_pm25 = 59.1
+        try:
+            st = get_live_station_reading(place.latitude, place.longitude, place.name, place=place)
+            if st and st.get("pm25"):
+                live_pm25 = float(st["pm25"])
+        except Exception:
+            pass
 
         limit_days = 25 if model == "seasonal-outlook" else 5
         start_day = 6 if model == "seasonal-outlook" else 1
+
         for k in range(start_day, start_day + limit_days):
             target_date = (now + timedelta(days=k)).date()
-            fest_prox = max(0, 10 - min([abs((f - target_date).days) for f in [date(2026, 11, 8), date(2026, 10, 20)]]))
-            day_of_year = target_date.timetuple().tm_yday
-            seasonal_factor = 1.0 + 0.12 * math.sin((day_of_year - 80) * 2 * math.pi / 365.0)
-            pm = max(12.0, base_pm * seasonal_factor * (1.0 + (fest_prox * 0.08)))
-            a = compute_aqi(pm25=pm)
-            lo, hi = sub_index("pm25", pm * 0.85), sub_index("pm25", pm * 1.25)
+            d_str = target_date.isoformat()
+
+            if d_str in by_day and by_day[d_str]["pm25"]:
+                vals  = by_day[d_str]["pm25"]
+                v10s  = by_day[d_str]["pm10"]
+                raw25 = sum(vals) / len(vals)
+                raw10 = sum(v10s) / len(v10s) if v10s else raw25 * 1.2
+                # 2.65× calibration: satellite reanalysis → ground-level
+                pm    = round(raw25 * 2.65, 1)
+                pm10  = round(raw10 * 2.65, 1)
+            else:
+                # Fallback: live reading + seasonal drift
+                day_of_year = target_date.timetuple().tm_yday
+                seasonal_factor = 1.0 + 0.12 * math.sin((day_of_year - 80) * 2 * math.pi / 365.0)
+                pm   = round(max(20.0, live_pm25 * seasonal_factor), 1)
+                pm10 = round(pm * 1.2, 1)
+
+            # Festival proximity boost (Diwali 2026-10-20, Dev Diwali 2026-11-08)
+            fest_prox = max(0, 10 - min([abs((f - target_date).days)
+                                         for f in [date(2026, 11, 8), date(2026, 10, 20)]]))
+            pm   = round(pm * (1.0 + fest_prox * 0.05), 1)
+            pm10 = round(pm10 * (1.0 + fest_prox * 0.05), 1)
+
+            aqi = compute_us_aqi(pm25=pm, pm10=pm10)
+            lo  = compute_us_aqi(pm25=round(pm * 0.85, 1))
+            hi  = compute_us_aqi(pm25=round(pm * 1.25, 1))
+
             days.append({
-                "date": target_date.isoformat(),
-                "pm25": round(pm, 1),
-                "pm25_low": round(pm * 0.85, 1),
-                "pm25_high": round(pm * 1.25, 1),
-                "aqi": a["aqi"],
-                "aqi_low": lo,
-                "aqi_high": hi,
-                **category_for(a["aqi"]),
+                "date":       d_str,
+                "pm25":       pm,
+                "pm25_low":   round(pm * 0.85, 1),
+                "pm25_high":  round(pm * 1.25, 1),
+                "aqi":        aqi,
+                "aqi_low":    lo,
+                "aqi_high":   hi,
+                **category_for(aqi),
             })
+
         gen_str = now.isoformat(timespec="minutes") + "Z"
 
 
