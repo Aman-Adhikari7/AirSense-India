@@ -387,7 +387,7 @@ export default function SearchPage() {
               {sortedStations.map((p) => {
                 const aqiVal = p.aqi;
                 const aqiColor = p.color || (aqiVal != null ? "#1E9E57" : "#BDBDBD");
-                const isDelayed = p.is_stale || (p.data_age_minutes && p.data_age_minutes > 30);
+                const isDelayed = Boolean(p.is_stale || (p.data_age_minutes != null && p.data_age_minutes > 30));
 
                 return (
                   <div

@@ -316,7 +316,7 @@ export default function Home() {
                   {inspectPlace.measurement_ts && (
                     <span className="text-gray-500">• 🕒 Measured: <strong>{new Date(inspectPlace.measurement_ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} IST</strong></span>
                   )}
-                  {(inspectPlace.is_stale || (inspectPlace.data_age_minutes && inspectPlace.data_age_minutes > 30)) && (
+                  {Boolean(inspectPlace.is_stale || (inspectPlace.data_age_minutes != null && inspectPlace.data_age_minutes > 30)) && (
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                       ⚠️ {formatAgeWarning(inspectPlace.data_age_minutes, inspectPlace.warning)}
                     </span>
@@ -374,7 +374,7 @@ export default function Home() {
               {featuredStations.map((item) => {
                 const pl = item.place;
                 const aqiVal = item.aqi ?? item.current_aqi;
-                const isDelayed = item.is_stale || (item.data_age_minutes && item.data_age_minutes > 30);
+                const isDelayed = Boolean(item.is_stale || (item.data_age_minutes != null && item.data_age_minutes > 30));
                 return (
                   <div
                     key={pl.id}
