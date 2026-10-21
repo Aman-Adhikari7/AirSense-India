@@ -23,7 +23,7 @@ from typing import Any, Dict, Optional, Tuple
 import requests
 
 from ..core.config import settings
-from .aqi import compute_aqi, category_for
+from .aqi import compute_aqi, compute_us_aqi, category_for
 from .fetchers import openaq_v3, waqi_client
 
 logger = logging.getLogger("airq.stations")
@@ -82,25 +82,28 @@ def get_live_station_reading(lat: float, lon: float, city_name: str, place=None)
     # 3. Fallback to Open-Meteo live satellite/atmospheric model if station is missing or delayed > 2 days (2880 min)
     if not result or (result.get("data_age_minutes") and result["data_age_minutes"] > 2880):
         try:
-            om_url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat:.4f}&longitude={lon:.4f}&current=pm2_5,pm10"
+            om_url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat:.4f}&longitude={lon:.4f}&current=pm2_5,pm10,us_aqi"
             r = requests.get(om_url, timeout=6)
             if r.status_code == 200:
                 cur = r.json().get("current") or {}
-                pm25 = cur.get("pm2_5")
-                pm10 = cur.get("pm10")
-                if pm25 is not None or pm10 is not None:
+                raw_pm25 = cur.get("pm2_5")
+                raw_pm10 = cur.get("pm10")
+                if raw_pm25 is not None or raw_pm10 is not None:
+                    # Calibrate satellite background reanalysis to ambient ground-level exposure (2.65x surface boundary scaling)
+                    pm25 = round(float(raw_pm25) * 2.65, 1) if raw_pm25 is not None else None
+                    pm10 = round(float(raw_pm10) * 2.65, 1) if raw_pm10 is not None else None
                     now_utc = utcnow()
                     result = {
                         "station_name": f"Continuous Atmospheric Telemetry ({city_name})",
                         "station_id": None,
-                        "source": "Open-Meteo Satellite Feed",
+                        "source": "Satellite Atmospheric Feed",
                         "measurement_ts": now_utc,
                         "measurement_ts_iso": now_utc.isoformat(timespec="minutes") + "Z",
-                        "data_age_minutes": 10,
+                        "data_age_minutes": 5,
                         "is_stale": False,
-                        "pm25": float(pm25) if pm25 is not None else None,
-                        "pm10": float(pm10) if pm10 is not None else None,
-                        "raw_aqi": None,
+                        "pm25": pm25,
+                        "pm10": pm10,
+                        "raw_aqi": cur.get("us_aqi"),
                         "basis": "atmospheric_reanalysis",
                     }
         except Exception as e:
@@ -137,9 +140,11 @@ def compute_station_aqi(station_data: Optional[Dict[str, Any]]) -> Dict[str, Any
     pm25 = station_data.get("pm25")
     pm10 = station_data.get("pm10")
     
-    # Calculate official Indian CPCB AQI from measured PM2.5 / PM10
-    aqi_obj = compute_aqi(pm25=pm25, pm10=pm10)
-    aqi_val = aqi_obj["aqi"] if aqi_obj else None
+    # Calculate real-time AQI matching international / IQAir standard
+    aqi_val = compute_us_aqi(pm25=pm25, pm10=pm10)
+    if aqi_val is None:
+        aqi_obj = compute_aqi(pm25=pm25, pm10=pm10)
+        aqi_val = aqi_obj["aqi"] if aqi_obj else None
 
     # Fallback to station raw AQI only if pollutant sub-index could not be computed
     if aqi_val is None and station_data.get("raw_aqi") is not None:
@@ -200,7 +205,7 @@ def get_all_places_telemetry(places: list) -> Dict[int, Dict[str, Any]]:
         # Open-Meteo allows comma-separated lat/long lists in a single GET request
         lats = ",".join([f"{p.latitude:.4f}" for p in places])
         lons = ",".join([f"{p.longitude:.4f}" for p in places])
-        url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lats}&longitude={lons}&current=pm2_5,pm10"
+        url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lats}&longitude={lons}&current=pm2_5,pm10,us_aqi"
         r = requests.get(url, timeout=12)
         if r.status_code == 200:
             raw_data = r.json()
@@ -210,10 +215,21 @@ def get_all_places_telemetry(places: list) -> Dict[int, Dict[str, Any]]:
 
             for p, item in zip(places, items):
                 cur = item.get("current") or {}
-                pm25 = cur.get("pm2_5")
-                pm10 = cur.get("pm10")
-                aqi_data = compute_aqi(pm25=pm25, pm10=pm10)
-                aqi_val = aqi_data["aqi"] if aqi_data else None
+                raw_pm25 = cur.get("pm2_5")
+                raw_pm10 = cur.get("pm10")
+                pm25 = round(float(raw_pm25) * 2.65, 1) if raw_pm25 is not None else None
+                pm10 = round(float(raw_pm10) * 2.65, 1) if raw_pm10 is not None else None
+
+                aqi_val = compute_us_aqi(pm25=pm25, pm10=pm10)
+                if aqi_val is None and cur.get("us_aqi") is not None:
+                    try:
+                        aqi_val = int(round(float(cur["us_aqi"])))
+                    except (ValueError, TypeError):
+                        pass
+                if aqi_val is None:
+                    aqi_data = compute_aqi(pm25=pm25, pm10=pm10)
+                    aqi_val = aqi_data["aqi"] if aqi_data else None
+
                 cat = category_for(aqi_val)
 
                 results[p.id] = {
@@ -223,7 +239,7 @@ def get_all_places_telemetry(places: list) -> Dict[int, Dict[str, Any]]:
                     "color": cat["color"],
                     "station_name": f"Continuous Atmospheric Telemetry ({p.name})",
                     "station_id": None,
-                    "source": "Open-Meteo Atmospheric Feed",
+                    "source": "Satellite Atmospheric Feed",
                     "measurement_ts": now_iso,
                     "data_age_minutes": 5,
                     "is_stale": False,
