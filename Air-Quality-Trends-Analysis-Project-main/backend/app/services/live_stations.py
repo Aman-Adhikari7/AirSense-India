@@ -122,10 +122,15 @@ def compute_station_aqi(station_data: Optional[Dict[str, Any]]) -> Dict[str, Any
     cat = category_for(aqi_val)
     age_min = station_data.get("data_age_minutes") or 0
     is_stale = age_min > settings.STALE_AFTER_MINUTES
-    warning = (
-        f"Data is {age_min} minutes old (exceeds 30 min threshold). Station feed may be delayed."
-        if is_stale else None
-    )
+    if is_stale:
+        if age_min >= 1440:
+            warning = f"Data is {age_min // 1440} days old (station feed delayed)"
+        elif age_min >= 60:
+            warning = f"Data is {age_min // 60} hours old (station feed delayed)"
+        else:
+            warning = f"Data is {age_min} min old (>30 min delay)"
+    else:
+        warning = None
 
     return {
         "aqi": aqi_val,

@@ -16,6 +16,26 @@ const CPCB_SCALE = [
   { label: "Severe", range: "401 - 500", color: "#7B1113", desc: "Affects healthy people and seriously impacts sensitive groups" },
 ];
 
+function formatDataAge(minutes) {
+  if (minutes == null) return "Live";
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function formatAgeWarning(minutes, warning) {
+  if (warning) return warning;
+  if (!minutes || minutes <= 30) return null;
+  if (minutes < 60) return `Data is ${minutes}m old (>30 min delay)`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Data is ${hours}h old (station feed delayed)`;
+  const days = Math.floor(hours / 24);
+  return `Station delayed (${days} days old • CPCB baseline)`;
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -291,13 +311,15 @@ export default function Home() {
                 <div className="text-xs text-gray-700 mt-1 flex flex-wrap items-center gap-2">
                   <span>📡 Station: <strong>{inspectPlace.station_name || "Continuous Monitoring Station"}</strong></span>
                   {inspectPlace.data_age_minutes != null && (
-                    <span className="text-gray-500">• ⏱️ Age: <strong>{inspectPlace.data_age_minutes}m ago</strong></span>
+                    <span className="text-gray-500">• ⏱️ Age: <strong>{formatDataAge(inspectPlace.data_age_minutes)}</strong></span>
                   )}
                   {inspectPlace.measurement_ts && (
                     <span className="text-gray-500">• 🕒 Measured: <strong>{new Date(inspectPlace.measurement_ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} IST</strong></span>
                   )}
                   {(inspectPlace.is_stale || (inspectPlace.data_age_minutes && inspectPlace.data_age_minutes > 30)) && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">⚠️ &gt;30 min delayed</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                      ⚠️ {formatAgeWarning(inspectPlace.data_age_minutes, inspectPlace.warning)}
+                    </span>
                   )}
                 </div>
               </div>
@@ -383,14 +405,14 @@ export default function Home() {
                         </div>
                         <div className="flex items-center justify-between text-gray-500 text-[11px] pt-1 border-t border-gray-100">
                           <span>🕒 {item.measurement_ts ? new Date(item.measurement_ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' IST' : 'Live'}</span>
-                          <span>⏱️ Age: <strong>{item.data_age_minutes != null ? `${item.data_age_minutes}m` : 'Live'}</strong></span>
+                          <span>⏱️ Age: <strong>{formatDataAge(item.data_age_minutes)}</strong></span>
                         </div>
                       </div>
 
                       {isDelayed && (
                         <div className="mt-2 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1 flex items-center gap-1">
                           <span>⚠️</span>
-                          <span>Data is {item.data_age_minutes} min old (&gt;30 min delay)</span>
+                          <span>{formatAgeWarning(item.data_age_minutes, item.warning)}</span>
                         </div>
                       )}
                     </div>

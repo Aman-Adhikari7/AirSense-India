@@ -40,6 +40,16 @@ def _get_place(db: Session, place_id: int) -> Place:
     return place
 
 
+def _format_warning(age_min: int) -> Optional[str]:
+    if not age_min or age_min <= 30:
+        return None
+    if age_min >= 1440:
+        return f"Data is {age_min // 1440} days old (station feed delayed)"
+    if age_min >= 60:
+        return f"Data is {age_min // 60} hours old (station feed delayed)"
+    return f"Data is {age_min} min old (>30 min delay)"
+
+
 @router.get("/places/states")
 def list_states(db: Session = Depends(get_db)):
     rows = db.execute(
@@ -79,7 +89,7 @@ def get_featured_forecasts(db: Session = Depends(get_db)):
                         "measurement_ts": latest.get("ts"),
                         "data_age_minutes": age_min,
                         "is_stale": age_min > 30,
-                        "warning": f"Data is {age_min} minutes old (exceeds 30 min threshold)" if age_min > 30 else None,
+                        "warning": _format_warning(age_min),
                         "pm25": latest.get("pm25"),
                         "pm10": latest.get("pm10"),
                         "basis": "ground",
@@ -240,7 +250,7 @@ def map_summary(db: Session = Depends(get_db)):
                         "measurement_ts": latest.get("ts"),
                         "data_age_minutes": age_min,
                         "is_stale": age_min > 30,
-                        "warning": f"Data is {age_min} min old (> 30 min)" if age_min > 30 else None,
+                        "warning": _format_warning(age_min),
                         "pm25": latest.get("pm25"),
                         "pm10": latest.get("pm10"),
                         "basis": "ground",

@@ -16,7 +16,7 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
     {
       sender: "ai",
       text:
-        "Hello! I am AirSense AI — your intelligent air quality assistant for India, powered by Groq AI.\n\n" +
+        "Hello! I am AirSense AI — your intelligent air quality assistant for India.\n\n" +
         "I can help you with:\n" +
         "• Live City AQI — \"What is the AQI in Chandigarh?\", \"Delhi air quality\", \"Mumbai pollution\"\n" +
         "• State-level AQI — \"AQI in UP?\", \"Punjab air quality\", \"Maharashtra\"\n" +
@@ -147,8 +147,8 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
                   <h3 className="font-bold text-gray-900 text-sm">AirSense AI Assistant</h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
-                      <span>Groq AI Connected</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                      <span>AI Online</span>
                       <span className="text-emerald-600">•</span>
                       <span>{MAX_QUESTIONS - questionCount}/{MAX_QUESTIONS} left</span>
                       <button
@@ -179,16 +179,6 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
               </button>
             </div>
 
-            {/* Groq Active Banner */}
-            <div className="bg-emerald-50 border-b border-emerald-200 px-3.5 py-2 text-[11px] text-emerald-900 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block flex-shrink-0"></span>
-              <div className="leading-tight">
-                <span className="font-bold text-emerald-800">Groq AI Active</span>
-                {" — "}Powered by <code className="bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded font-mono text-[10px]">qwen/qwen3.8-27b</code>.
-                Ask any air quality question, health advice, or city AQI.
-              </div>
-            </div>
-
             {/* Messages Thread */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 text-xs sm:text-sm">
               {messages.map((m, idx) => (
@@ -207,7 +197,7 @@ export default function AiAssistantModal({ placeId = null, placeName = null }) {
                   </div>
                   {m.provider && (
                     <span className="text-[10px] text-gray-400 mt-1 px-1">
-                      via {m.provider}
+                      via AirSense Intelligence
                     </span>
                   )}
                 </div>
